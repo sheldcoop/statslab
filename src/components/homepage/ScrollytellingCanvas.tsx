@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useTransform, type MotionValue } from 'framer-motion';
 import * as THREE from 'three';
 import { SceneChaos } from './SceneChaos';
@@ -39,18 +38,14 @@ export default function ScrollytellingCanvas({ scrollYProgress }: Scrollytelling
   const tsOpacity = useTransform(scrollYProgress, [0.58, 0.65, 0.75, 0.8], [0, 1, 1, 0]);
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0 }}>
-      <Canvas>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <Suspense fallback={null}>
-          <SceneChaos opacity={chaosOpacity} />
-          <SceneLinearAlgebra opacity={laOpacity} />
-          <SceneStatistics opacity={statsOpacity} />
-          <SceneTimeSeries opacity={tsOpacity} />
-        </Suspense>
-        <CameraRig scrollYProgress={scrollYProgress} />
-      </Canvas>
-    </div>
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 5, 5]} intensity={1} />
+      <SceneChaos opacity={chaosOpacity} />
+      <SceneLinearAlgebra opacity={laOpacity} />
+      <SceneStatistics opacity={statsOpacity} />
+      <SceneTimeSeries opacity={tsOpacity} />
+      <CameraRig scrollYProgress={scrollYProgress} />
+    </>
   );
 }
