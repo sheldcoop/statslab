@@ -33,6 +33,9 @@ const BGLinearAlgebra = () => (
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill="url(#grid)" />
+      {/* Axes */}
+      <line x1="0" y1="50%" x2="100%" y2="50%" stroke="hsl(var(--muted))" strokeWidth="0.5" />
+      <line x1="50%" y1="0" x2="50%" y2="100%" stroke="hsl(var(--muted))" strokeWidth="0.5" />
       <motion.line
         x1="50%"
         y1="50%"
