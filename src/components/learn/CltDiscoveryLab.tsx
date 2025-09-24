@@ -94,7 +94,7 @@ export default function CltDiscoveryLab() {
   const [isPopulationLoading, setIsPopulationLoading] = useState(true);
 
   const [sampleSize, setSampleSize] = useState(30);
-  const [numSamples, setNumSamples] = useState(2500);
+  const [numSamples, setNumSamples] = useState(5000);
   const [isSimulating, setIsSimulating] = useState(false);
 
   const [sampleMeans, setSampleMeans] = useState<number[]>([]);
@@ -128,7 +128,7 @@ export default function CltDiscoveryLab() {
 
   useEffect(() => {
     setIsPopulationLoading(true);
-    const data = generatePopulationData(populationShape, 10000);
+    const data = generatePopulationData(populationShape, 20000);
     setPopulationData(data);
     setIsPopulationLoading(false);
   }, [populationShape]);
@@ -142,8 +142,8 @@ export default function CltDiscoveryLab() {
     return { populationMean: mean, populationStdDev: stdDev, populationDomain: domain };
   }, [populationData]);
   
-  const populationBinned = useMemo(() => binData(populationData, 40), [populationData]);
-  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40, populationDomain), [sampleMeans, populationDomain]);
+  const populationBinned = useMemo(() => binData(populationData, 50), [populationData]);
+  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
 
   const runFullSimulation = useCallback(() => {
     if (isSimulating) return;
@@ -314,7 +314,7 @@ export default function CltDiscoveryLab() {
             <CardContent className="h-[300px] pl-2 pr-6">
                <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={sampleMeansBinned} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                    <XAxis dataKey="name" domain={populationDomain} type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
+                    <XAxis dataKey="name" type="number" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={40} tickFormatter={(v) => v > 0 ? v : ''}/>
                     <Tooltip
                         cursor={{ fill: 'hsla(var(--muted) / 0.1)'}}
