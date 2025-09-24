@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 195 20% 9%; /* #0D1117 */
+    --background: 222 83% 4%; /* #0D1117 */
     --foreground: 210 17% 95%; /* #E6EDF3 */
-    --card: 210 14% 10%; /* #161B22 */
+    --card: 222 47% 11%; /* #161B22 */
     --card-foreground: 210 17% 95%; /* #E6EDF3 */
-    --popover: 195 20% 9%;
+    --popover: 222 83% 4%;
     --popover-foreground: 210 17% 95%;
-    --primary: 138 64% 34%; /* #238636 */
+    --primary: 142 64% 34%; /* #238636 */
     --primary-foreground: 210 17% 95%; /* #E6EDF3 */
-    --secondary: 212 100% 67%; /* #58A6FF */
-    --secondary-foreground: 210 17% 95%;
-    --muted: 214 9% 51%; /* #79818b - adjusted from #8B949E for better contrast */
-    --muted-foreground: 214 9% 51%; /* #79818b */
-    --accent: 212 100% 67%; /* #58A6FF */
+    --secondary: 204 92% 67%; /* #58A6FF */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 14% 50%; /* #8B949E -> Adjusted for better readability */
+    --muted-foreground: 220 9% 55%; /* #848d97 */
+    --accent: 212 100% 67%; /* #58A6FF - Re-using secondary for accent */
     --accent-foreground: 210 17% 95%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 210 14% 20%; /* A bit lighter than card bg */
-    --input: 210 14% 20%;
-    --ring: 138 64% 34%;
+    --border: 222 24% 19%; /* #21262d */
+    --input: 222 24% 19%;
+    --ring: 142 64% 34%;
     --radius: 0.5rem;
   }
 }

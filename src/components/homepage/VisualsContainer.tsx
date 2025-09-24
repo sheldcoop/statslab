@@ -5,22 +5,19 @@ import React from 'react';
 import ModuleGrid from './ModuleGrid';
 
 const VisualPlaceholder = ({
-  color,
   children,
 }: {
-  color: string;
   children?: React.ReactNode;
 }) => (
   <div
     className="absolute inset-0 flex items-center justify-center"
-    style={{ backgroundColor: color }}
   >
     {children}
   </div>
 );
 
 const ChaosVisual = () => (
-  <VisualPlaceholder color="transparent">
+  <VisualPlaceholder>
     <div className="grid h-full w-full grid-cols-20 grid-rows-20">
       {Array.from({ length: 400 }).map((_, i) => (
         <motion.div
@@ -44,7 +41,7 @@ const ChaosVisual = () => (
   </VisualPlaceholder>
 );
 const LinearAlgebraVisual = () => (
-  <VisualPlaceholder color="transparent">
+  <VisualPlaceholder>
     <svg
       width="200"
       height="200"
@@ -110,7 +107,7 @@ const LinearAlgebraVisual = () => (
   </VisualPlaceholder>
 );
 const StatisticsVisual = () => (
-  <VisualPlaceholder color="transparent">
+  <VisualPlaceholder>
     <svg
       width="200"
       height="100"
@@ -136,7 +133,7 @@ const StatisticsVisual = () => (
   </VisualPlaceholder>
 );
 const TimeSeriesVisual = () => (
-  <VisualPlaceholder color="transparent">
+  <VisualPlaceholder>
     <svg
       width="200"
       height="100"
@@ -162,7 +159,7 @@ const TimeSeriesVisual = () => (
   </VisualPlaceholder>
 );
 const PythonVisual = () => (
-  <VisualPlaceholder color="transparent">
+  <VisualPlaceholder>
     <motion.code
       className="font-headline text-4xl text-primary opacity-30"
       initial={{ opacity: 0.3 }}
@@ -184,11 +181,11 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number];
+  range: [number, number, number, number];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [range[0], (range[0] + range[1]) / 2, range[1]], [0, 1, 0]);
-  return <motion.div style={{ opacity }}>{children}</motion.div>;
+  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
+  return <motion.div style={{ opacity }} className="absolute inset-0">{children}</motion.div>;
 };
 
 export default function VisualsContainer({
@@ -199,16 +196,16 @@ export default function VisualsContainer({
   return (
     <div className="sticky top-0 h-screen w-full">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.2, 0.4]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.35, 0.45]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.6]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.35, 0.45, 0.55, 0.65]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.8]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.55, 0.65, 0.75, 0.85]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.8, 0.95]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.85, 0.95, 1.0]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress}>
@@ -225,24 +222,24 @@ const ModuleGridVisual = ({
   scrollYProgress: MotionValue<number>;
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0.9, 1.0], [0, 1]);
+  const opacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
   return (
-    <motion.div style={{ opacity }}>
-      <ChaosVisual /> 
+    <motion.div style={{ opacity }} className="absolute inset-0">
+      <ChaosVisual />
       {children}
     </motion.div>
   );
 };
 
-//Adjust the first Visual to be visible at the start
+
 const FirstVisual = ({
   scrollYProgress,
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.1, 0.2], [1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.25], [1, 1, 0]);
   return (
-    <motion.div style={{ opacity }}>
+    <motion.div style={{ opacity }} className="absolute inset-0">
       <ChaosVisual />
     </motion.div>
   );

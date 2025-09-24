@@ -10,37 +10,177 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import React from 'react';
+
+// --- Thematic Background Components ---
+
+const BGLinearAlgebra = () => (
+    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20">
+        <svg width="100%" height="100%" >
+            <defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+             <motion.line
+                x1="50%"
+                y1="50%"
+                stroke="hsl(var(--primary))"
+                strokeWidth="1.5"
+                initial={{ x2: "70%", y2: "30%" }}
+                animate={{ x2: ["30%", "70%", "30%"], y2: ["70%", "30%", "70%"] }}
+                transition={{
+                duration: 4,
+                repeat: Infinity,
+                repeatType: 'mirror',
+                ease: 'easeInOut',
+                }}
+            />
+        </svg>
+    </div>
+);
+
+const BGStatistics = () => (
+    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20 flex items-center justify-center">
+         <svg width="80%" height="80%" viewBox="0 0 200 100" preserveAspectRatio="none">
+            <motion.path
+                d="M 0 100 C 50 100, 75 20, 100 50 S 150 100, 200 80"
+                stroke="hsl(var(--secondary))"
+                fill="transparent"
+                strokeWidth="2"
+                initial={{ pathLength: 0, stroke: 'hsl(var(--primary))' }}
+                animate={{ pathLength: 1, stroke: 'hsl(var(--secondary))' }}
+                transition={{
+                duration: 2,
+                repeat: Infinity,
+                repeatType: 'reverse',
+                ease: 'easeInOut',
+                }}
+            />
+        </svg>
+    </div>
+);
+
+
+const BGPython = () => (
+     <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20 flex items-center justify-center">
+        <motion.code
+            className="font-headline text-5xl text-primary opacity-50"
+            initial={{ opacity: 0.3 }}
+            animate={{ opacity: [0.3, 0.8, 0.3] }}
+            transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+            }}
+            >
+            {'< >'}
+        </motion.code>
+    </div>
+);
+
+const BGTimeSeries = () => (
+     <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20 flex items-center justify-center">
+       <svg width="80%" height="80%" viewBox="0 0 200 100" preserveAspectRatio="none">
+            <motion.path
+                d="M 0 50 Q 25 20, 50 50 T 100 50 T 150 50 T 200 50"
+                stroke="hsl(var(--secondary))"
+                fill="transparent"
+                strokeWidth="2"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{
+                duration: 2.5,
+                ease: 'easeInOut',
+                repeat: Infinity,
+                repeatType: 'reverse',
+                }}
+            />
+        </svg>
+    </div>
+);
+
+const BGMachineLearning = () => (
+    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-10 flex items-center justify-center">
+        {[-40, 0, 40].map(y => 
+            [-60, 0, 60].map(x => (
+                 <motion.circle 
+                    key={`${x}-${y}`}
+                    cx="50%"
+                    cy="50%"
+                    r="4"
+                    fill="hsl(var(--secondary))"
+                    initial={{x, y, opacity: 0.5}}
+                    animate={{opacity: [0.2, 0.7, 0.2]}}
+                    transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: Math.random(),
+                        ease: 'easeInOut'
+                    }}
+                />
+            ))
+        )}
+    </div>
+);
+
+const BGAlgorithmicTrading = () => (
+    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20 flex items-center justify-center p-4">
+        {Array.from({length: 4}).map((_, i) => (
+            <motion.div 
+                key={i}
+                className="w-4 h-16 bg-primary/50 rounded-sm mx-1"
+                initial={{scaleY: 0.5, opacity: 0.5}}
+                animate={{scaleY: [0.3, 1, 0.3], opacity: [0.4, 0.8, 0.4]}}
+                transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.3,
+                    ease: 'easeInOut'
+                }}
+            />
+        ))}
+    </div>
+);
+
 
 const gridItems = [
   {
     icon: Orbit,
     title: 'Linear Algebra',
     description: 'Vectors, matrices, and tensors. The language of data.',
+    background: <BGLinearAlgebra />,
   },
   {
     icon: Sigma,
     title: 'Statistics & Probability',
     description: 'Quantifying uncertainty and making sense of distributions.',
+    background: <BGStatistics />,
   },
   {
     icon: Code,
     title: 'Python for Quants',
     description: 'NumPy, Pandas, SciPy. The tools of the trade.',
+    background: <BGPython />,
   },
   {
     icon: TrendingUp,
     title: 'Time Series Analysis',
     description: 'ARIMA, GARCH, and forecasting market movements.',
+    background: <BGTimeSeries />,
   },
   {
     icon: Cpu,
     title: 'Machine Learning',
     description: 'Building predictive models for financial markets.',
+    background: <BGMachineLearning />,
   },
   {
     icon: Calculator,
     title: 'Algorithmic Trading',
     description: 'From strategy backtesting to live deployment.',
+    background: <BGAlgorithmicTrading />,
   },
 ];
 
@@ -79,60 +219,9 @@ const footerVariants = {
     }
 }
 
-const backgroundContainerVariants = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.5,
-    },
-  },
-};
-
-const backgroundItemVariants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1 },
-};
-
-const CardBackground = () => (
-  <motion.div 
-    className="absolute inset-0 z-0 overflow-hidden rounded-lg"
-    variants={backgroundContainerVariants}
-    initial="hidden"
-    animate="show"
-  >
-    {Array.from({ length: 5 }).map((_, i) => (
-      <motion.div
-        key={i}
-        variants={backgroundItemVariants}
-        className="absolute h-40 w-40 rounded-full bg-secondary/10"
-        initial={{
-          x: `${Math.random() * 100}%`,
-          y: `${Math.random() * 100}%`,
-          scale: 1,
-          opacity: 0
-        }}
-        animate={{
-          x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-          y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-          scale: [1, 1.2, 1],
-          opacity: [0, 0.5, 0],
-        }}
-        transition={{
-          duration: Math.random() * 5 + 5, // Faster duration
-          repeat: Infinity,
-          repeatType: 'loop',
-          ease: 'easeInOut',
-          delay: i * 1, // Staggered delay
-        }}
-      />
-    ))}
-  </motion.div>
-);
-
-
 export default function ModuleGrid() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#0D1117] p-4 md:p-8">
+    <div className="flex h-screen w-full items-center justify-center bg-transparent p-4 md:p-8">
       <motion.div 
         className="w-full max-w-6xl text-center"
         initial="hidden"
@@ -147,7 +236,7 @@ export default function ModuleGrid() {
             Begin Your Journey
           </motion.h1>
           <motion.p 
-            className="mt-4 text-xl text-[#8B949E]"
+            className="mt-4 text-xl text-muted-foreground"
             variants={gridItemVariants}
           >
             Master the core pillars of quantitative finance and data science.
@@ -170,9 +259,9 @@ export default function ModuleGrid() {
                   boxShadow: '0 0 25px hsl(var(--secondary) / 0.2)',
                   transition: { duration: 0.2, ease: 'easeOut' },
                 }}
-                className="relative cursor-pointer overflow-hidden rounded-lg border-2 border-[#21262d] bg-[#161B22] p-6 text-left"
+                className="relative cursor-pointer overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left"
               >
-                <CardBackground />
+                {item.background}
                 <div className="relative z-10">
                     <div className="mb-4">
                         <Icon className="h-8 w-8 text-secondary" />
@@ -180,7 +269,7 @@ export default function ModuleGrid() {
                     <h3 className="font-headline text-2xl font-bold">
                         {item.title}
                     </h3>
-                    <p className="mt-2 text-sm text-[#8B949E]">
+                    <p className="mt-2 text-sm text-muted-foreground">
                         {item.description}
                     </p>
                 </div>

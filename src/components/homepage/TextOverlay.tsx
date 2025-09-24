@@ -26,7 +26,7 @@ const TextSection = ({
         <h2 className="font-headline text-5xl font-bold md:text-7xl">
           {title}
         </h2>
-        <p className="mt-4 font-body text-xl text-[#8B949E]">{subtitle}</p>
+        <p className="mt-4 font-body text-xl text-muted-foreground">{subtitle}</p>
       </motion.div>
     </section>
   );
@@ -64,19 +64,17 @@ export default function TextOverlay({
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
-      <section className="h-screen" />
     </div>
   );
 }
 
-// Adjust the first TextSection's range to be visible at the start
 const FirstTextSection = ({
   scrollYProgress,
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.25], [1, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.25], [0, 0, 0, -100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.25], [1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.05, 0.25], [0, 0, -100]);
 
   return (
     <section className="flex h-screen items-center justify-center">
@@ -87,7 +85,7 @@ const FirstTextSection = ({
         <h2 className="font-headline text-5xl font-bold md:text-7xl">
           Data is Chaos
         </h2>
-        <p className="mt-4 font-body text-xl text-[#8B949E]">
+        <p className="mt-4 font-body text-xl text-muted-foreground">
           It’s a universe of disconnected points, a symphony without a
           conductor. Our journey begins by facing this raw, untamed wilderness.
         </p>

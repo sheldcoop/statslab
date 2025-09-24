@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <main
       ref={scrollRef}
-      className="relative min-h-[700vh] w-full bg-[#0D1117] text-[#E6EDF3]"
+      className="relative min-h-[500vh] w-full bg-background text-foreground"
     >
       <VisualsContainer scrollYProgress={scrollYProgress} />
       <TextOverlay scrollYProgress={scrollYProgress} />
