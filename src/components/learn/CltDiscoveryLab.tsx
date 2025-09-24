@@ -122,6 +122,7 @@ const usePopulationControls = () => {
   const [stdDev, setStdDev] = useState(1.5);
   const [sampleSize, setSampleSize] = useState(30);
   const [numSamples, setNumSamples] = useState(5000);
+  const [animationSpeed, setAnimationSpeed] = useState(100);
 
   const controls = {
     shape,
@@ -134,6 +135,8 @@ const usePopulationControls = () => {
     setSampleSize,
     numSamples,
     setNumSamples,
+    animationSpeed,
+    setAnimationSpeed,
   };
 
   const reset = () => {
@@ -142,6 +145,7 @@ const usePopulationControls = () => {
     setStdDev(1.5);
     setSampleSize(30);
     setNumSamples(5000);
+    setAnimationSpeed(100);
   };
 
   return { controls, reset };
@@ -219,7 +223,8 @@ const usePopulation = (
 const useSimulation = (
     populationData: number[], 
     sampleSize: number, 
-    numSamples: number
+    numSamples: number,
+    animationSpeed: number
 ) => {
     const [sampleMeans, setSampleMeans] = useState<number[]>([]);
     const [isSimulating, setIsSimulating] = useState(false);
@@ -233,7 +238,7 @@ const useSimulation = (
         setIsSimulating(true);
     
         let means: number[] = [];
-        const totalBatches = 100;
+        const totalBatches = animationSpeed;
         const batchSize = Math.max(1, Math.ceil(numSamples / totalBatches));
         let currentBatch = 0;
     
@@ -260,7 +265,7 @@ const useSimulation = (
         };
     
         simulationRef.current.id = requestAnimationFrame(simulationStep);
-      }, [sampleSize, numSamples, populationData, isSimulating]);
+      }, [sampleSize, numSamples, populationData, isSimulating, animationSpeed]);
 
     const stopSimulation = useCallback(() => {
         simulationRef.current.stop = true;
@@ -338,7 +343,7 @@ const SliderWithTooltip = ({ label, value, onValueChange, ...props }: Omit<React
 );
 
 const LabControls = ({ controls, isSimulating, onRun, onReset }: { controls: any, isSimulating: boolean, onRun: () => void, onReset: () => void }) => {
-    const { shape, setShape, mean, setMean, stdDev, setStdDev, sampleSize, setSampleSize, numSamples, setNumSamples } = controls;
+    const { shape, setShape, mean, setMean, stdDev, setStdDev, sampleSize, setSampleSize, numSamples, setNumSamples, animationSpeed, setAnimationSpeed } = controls;
     const [showTheoretical, setShowTheoretical] = useState(true);
 
     const handleParamChange = (setter: (value: number) => void) => (value: number) => {
@@ -403,6 +408,13 @@ const LabControls = ({ controls, isSimulating, onRun, onReset }: { controls: any
                   min={100} max={20000} step={100}
                   disabled={isSimulating}
                 />
+                 <SliderWithTooltip
+                  label="Animation Speed (Batches)"
+                  value={[animationSpeed]}
+                  onValueChange={setAnimationSpeed}
+                  min={10} max={500} step={10}
+                  disabled={isSimulating}
+                />
 
                 <div className="space-y-2 pt-2">
                     <Button onClick={onRun} disabled={isSimulating} className="w-full">
@@ -420,7 +432,7 @@ const LabControls = ({ controls, isSimulating, onRun, onReset }: { controls: any
 };
 
 const PopulationChart = React.memo(({ data, mean, stdDev, isLoading }: { data: number[], mean: number, stdDev: number, isLoading: boolean }) => {
-    const binnedData = useMemo(() => binData(data, 50), [data]);
+    const binnedData = useMemo(() => binData(data, 20), [data]);
     return (
         <Card>
             <CardHeader>
@@ -464,7 +476,7 @@ const SampleMeansChart = React.memo(({
   showTheoreticalCurve: boolean;
   isSimulating: boolean;
 }) => {
-  const binnedData = useMemo(() => binData(data, 40), [data]);
+  const binnedData = useMemo(() => binData(data, 20), [data]);
 
   const normalPDF = (x: number, mean: number, stdDev: number) => {
     if (stdDev <= 0) return 0;
@@ -517,7 +529,7 @@ export default function CltDiscoveryLab() {
         resetSimulation,
         simulatedMean,
         simulatedStdDev
-    } = useSimulation(populationData, controls.sampleSize, controls.numSamples);
+    } = useSimulation(populationData, controls.sampleSize, controls.numSamples, controls.animationSpeed);
 
     const theoreticalStdErr = useMemo(() => populationStdDev / Math.sqrt(controls.sampleSize), [populationStdDev, controls.sampleSize]);
     
@@ -589,5 +601,3 @@ export default function CltDiscoveryLab() {
         </div>
     );
 }
-
-    
