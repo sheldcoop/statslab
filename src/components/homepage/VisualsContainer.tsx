@@ -30,8 +30,12 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
         'k': [{x:0,y:0},{x:2,y:0},{x:0,y:1},{x:1,y:2},{x:0,y:3},{x:2,y:4},{x:0,y:4}],
     };
 
+    const logoOpacity = useTransform(progress, [0, 0.5], [1, 0]);
+    const scale = useTransform(progress, [0, 0.5], [1, 0.5]);
+
+
     return (
-        <div className="flex items-center justify-center h-full">
+        <motion.div className="flex items-center justify-center h-full" style={{ opacity: logoOpacity, scale }}>
             <div className="grid grid-cols-9 gap-x-4 gap-y-2" style={{ transform: 'scale(2)'}}>
                 {characters.map((char, charIndex) => (
                     <div key={charIndex} className="w-12 h-20 relative">
@@ -41,7 +45,6 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
                             
                             const x = useTransform(progress, [0, 1], [0, randomX]);
                             const y = useTransform(progress, [0, 1], [0, randomY]);
-                            const opacity = useTransform(progress, [0, 0.8, 1], [1, 0.5, 0]);
 
                             return (
                                 <motion.div
@@ -52,7 +55,6 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
                                         top: pos.y * 20,
                                         x,
                                         y,
-                                        opacity
                                     }}
                                 />
                             );
@@ -60,7 +62,7 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
                     </div>
                 ))}
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -93,15 +95,13 @@ const BGChaos = () => (
   );
 
 const ChaosVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number>}) => {
-    const chaosOpacity = useTransform(scrollYProgress, [0.15, 0.25], [0, 1]);
-    const logoProgress = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
+    const logoProgress = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+    const chaosOpacity = useTransform(logoProgress, [0.5, 1], [0, 1]);
 
     return (
         <VisualPlaceholder>
             <BGChaos />
-            <motion.div style={{opacity: useTransform(logoProgress, [0, 1], [1, 0]) }}>
-              <StatSparkLogo progress={logoProgress} />
-            </motion.div>
+            <StatSparkLogo progress={logoProgress} />
             <motion.div 
                 style={{ opacity: chaosOpacity }}
                 className="grid h-full w-full grid-cols-20 grid-rows-20"
@@ -221,32 +221,7 @@ const StatisticsVisual = () => (
     </svg>
   </VisualPlaceholder>
 );
-const TimeSeriesVisual = () => (
-  <VisualPlaceholder>
-    <svg
-      width="200"
-      height="100"
-      viewBox="0 0 200 100"
-      className="opacity-20"
-      preserveAspectRatio="none"
-    >
-      <motion.path
-        d="M 0 50 Q 25 20, 50 50 T 100 50 T 150 50 T 200 50"
-        stroke="hsl(var(--secondary))"
-        fill="transparent"
-        strokeWidth="2"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{
-          duration: 2,
-          ease: 'easeInOut',
-          repeat: Infinity,
-          repeatType: 'reverse',
-        }}
-      />
-    </svg>
-  </VisualPlaceholder>
-);
+
 const PythonVisual = () => (
   <VisualPlaceholder>
     <motion.code
@@ -270,11 +245,23 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number, number, number];
+  range: [number, number];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, range, [0.9, 1, 1, 0.9]);
+  const overlap = 0.05;
+  const start = range[0];
+  const end = range[1];
+
+  const opacity = useTransform(
+    scrollYProgress,
+    [start, start + overlap, end - overlap, end],
+    [0, 1, 1, 0]
+  );
+  const scale = useTransform(
+    scrollYProgress,
+    [start, start + overlap, end - overlap, end],
+    [0.95, 1, 1, 0.95]
+  );
   return <motion.div style={{ opacity, scale }} className="absolute inset-0">{children}</motion.div>;
 };
 
@@ -283,26 +270,22 @@ export default function VisualsContainer({
 }: {
   scrollYProgress: MotionValue<number>;
 }) {
-  const finalGridY = useTransform(scrollYProgress, [0.95, 1], ['100vh', '0vh']);
-  const finalGridOpacity = useTransform(scrollYProgress, [0.95, 1], [0, 1]);
+  const finalGridY = useTransform(scrollYProgress, [0.9, 1], ['100vh', '0vh']);
+  const finalGridOpacity = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
 
   return (
     <div className="sticky top-0 h-screen w-full overflow-hidden">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.2, 0.25, 0.4, 0.45]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.3, 0.5]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.45, 0.6, 0.65]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.5, 0.7]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.65, 0.8, 0.85]}>
-        <TimeSeriesVisual />
-      </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.8, 0.85, 0.9, 0.95]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.7, 0.9]}>
         <PythonVisual />
       </Visual>
        <motion.div style={{ y: finalGridY, opacity: finalGridOpacity }} className="absolute inset-0">
-          <ChaosVisual scrollYProgress={scrollYProgress} />
           <ModuleGrid />
       </motion.div>
     </div>
@@ -314,8 +297,9 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0.2, 0.25], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.25], [1, 0.9]);
+  const opacity = useTransform(scrollYProgress, [0.25, 0.3], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0.25, 0.3], [1, 0.95]);
+
   return (
     <motion.div style={{ opacity, scale }} className="absolute inset-0">
       <ChaosVisual scrollYProgress={scrollYProgress} />

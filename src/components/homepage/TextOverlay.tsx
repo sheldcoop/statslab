@@ -10,12 +10,25 @@ const TextSection = ({
   subtitle,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number, number, number];
+  range: [number, number];
   title: string;
   subtitle: string;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, range, [100, 0, 0, -100]);
+  // Use a small overlap for cross-fading
+  const overlap = 0.05;
+  const start = range[0];
+  const end = range[1];
+  
+  const opacity = useTransform(
+    scrollYProgress,
+    [start, start + overlap, end - overlap, end],
+    [0, 1, 1, 0]
+  );
+  const y = useTransform(
+    scrollYProgress,
+    [start, start + overlap, end - overlap, end],
+    [50, 0, 0, -50]
+  );
 
   return (
     <section className="flex h-screen items-center justify-center">
@@ -39,27 +52,28 @@ export default function TextOverlay({
 }) {
   return (
     <div className="pointer-events-none absolute inset-0">
+      {/* Each section gets a 20% slice of the scroll progress */}
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.15, 0.2, 0.4, 0.45]}
+        range={[0.1, 0.3]}
         title="Data is Chaos"
         subtitle="It’s a universe of disconnected points, a symphony without a conductor. Our journey begins by facing this raw, untamed wilderness."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.4, 0.45, 0.6, 0.65]}
+        range={[0.3, 0.5]}
         title="Linear Algebra Gives It Structure"
         subtitle="We introduce vectors and matrices—the language of space and transformation. The chaos begins to form shapes, to align along hidden axes."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.6, 0.65, 0.8, 0.85]}
+        range={[0.5, 0.7]}
         title="Statistics Finds the Pattern"
         subtitle="Probability and distributions reveal the invisible trends. We learn to listen for the signal within the noise, quantifying uncertainty."
       />
        <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.8, 0.85, 0.9, 0.95]}
+        range={[0.7, 0.9]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
