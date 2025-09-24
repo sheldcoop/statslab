@@ -47,6 +47,21 @@ const BGLinearAlgebra = () => (
           ease: 'easeInOut',
         }}
       />
+      <motion.line
+        x1="50%"
+        y1="50%"
+        stroke="hsl(var(--secondary))"
+        strokeWidth="1.5"
+        initial={{ x2: '30%', y2: '30%' }}
+        animate={{ x2: ['70%', '30%', '70%'], y2: ['70%', '30%', '70%'] }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          repeatType: 'mirror',
+          ease: 'easeInOut',
+          delay: 0.5,
+        }}
+      />
     </svg>
   </div>
 );
