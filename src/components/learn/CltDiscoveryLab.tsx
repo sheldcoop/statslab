@@ -34,6 +34,7 @@ const binData = (data: number[] | undefined, numBins: number) => {
     let min = Math.min(...data);
     let max = Math.max(...data);
     
+    // Handle case where all data points are the same or only one point exists
     if (min === max) {
       min = min - 1;
       max = max + 1;
@@ -50,13 +51,14 @@ const binData = (data: number[] | undefined, numBins: number) => {
     }));
 
     for (const d of data) {
-        const binIndex = Math.min(Math.max(Math.floor((d - min) / binSize),0), numBins - 1);
+        const binIndex = Math.min(Math.floor((d - min) / binSize), numBins - 1);
         if (bins[binIndex]) {
             bins[binIndex].value++;
         }
     }
     return bins;
 };
+
 
 const SIMULATION_SPEED_MS = 20; // How fast to run the simulation loop
 const BATCH_SIZE = 10; // How many samples to process per animation frame
@@ -132,6 +134,7 @@ export default function CltDiscoveryLab() {
   }, [sampleMeansBinned, theoreticalMean, theoreticalStdDev, sampleMeans.length]);
 
   const takeOneSample = useCallback(() => {
+      if (populationData.length === 0) return;
       const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
       setCurrentSingleSample(sample);
       const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
@@ -150,7 +153,7 @@ export default function CltDiscoveryLab() {
 
     let i = sampleMeans.length;
     const simulationLoop = () => {
-        if (i >= numSamples) {
+        if (i >= numSamples || populationData.length === 0) {
             setIsSimulating(false);
             setScene('lab'); // Move to lab scene after simulation
             return;
@@ -167,6 +170,12 @@ export default function CltDiscoveryLab() {
     };
     simulationLoop();
   }, [numSamples, sampleSize, populationData, scene, sampleMeans.length]);
+
+  const handleReset = useCallback(() => {
+    setSampleMeans([]);
+    setCurrentSingleSample([]);
+    setScene('intro');
+  }, []);
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
@@ -208,16 +217,17 @@ export default function CltDiscoveryLab() {
                 <AnimatePresence>
                   {scene === 'intro' && (
                      <motion.div initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
-                        <Button onClick={takeOneSample} className="w-full" disabled={isPopulationLoading}>
+                        <Button onClick={takeOneSample} className="w-full" disabled={isPopulationLoading || isSimulating}>
                           {isPopulationLoading ? 'Preparing Population...' : 'Take One Sample'}
                         </Button>
                      </motion.div>
                   )}
                   {scene === 'single_sample' && (
-                      <motion.div initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
-                          <Button onClick={runSimulation} className="w-full" disabled={isSimulating}>
+                      <motion.div initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-4">
+                           <Button onClick={runSimulation} className="w-full" disabled={isSimulating}>
                               {isSimulating ? "Simulating..." : `Run Simulation (${numSamples.toLocaleString()} times)`}
                           </Button>
+                           <Button onClick={handleReset} className="w-full" variant="outline">Reset</Button>
                       </motion.div>
                   )}
                    {(scene === 'simulation' || scene === 'lab') && (
@@ -228,7 +238,7 @@ export default function CltDiscoveryLab() {
                     >
                         <div>
                             <Label>Population Shape</Label>
-                            <Select value={populationParams.distribution} onValueChange={(v: DistributionInput['distribution']) => setPopulationParams(p => ({...p, distribution: v}))}>
+                            <Select value={populationParams.distribution} onValueChange={(v: DistributionInput['distribution']) => { setPopulationParams(p => ({...p, distribution: v})); setScene('intro'); }} disabled={isSimulating}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="positive-skew">Skewed (Positive)</SelectItem>
@@ -241,15 +251,17 @@ export default function CltDiscoveryLab() {
                         </div>
                         <div>
                             <Label>Sample Size: {sampleSize}</Label>
-                            <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} />
+                            <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} disabled={isSimulating}/>
                         </div>
                         <div>
                             <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
-                            <Slider value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={20000} step={100} />
+                            <Slider value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={20000} step={100} disabled={isSimulating} />
                         </div>
                         <Button onClick={runSimulation} disabled={isSimulating} className="w-full">
-                            {isSimulating ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Simulating...</>) : 'Run Simulation'}
+                            {isSimulating ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Simulating...</>) : 'Run New Simulation'}
                         </Button>
+                         <Button onClick={handleReset} className="w-full" variant="outline">Reset</Button>
+
                         <div className="flex items-center space-x-2 pt-4">
                         <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
                         <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
@@ -273,7 +285,7 @@ export default function CltDiscoveryLab() {
               ) : (
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={populationBinned} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => v > 0 ? v : ''}/>
                         <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]}>
                             {currentSampleBinned.length > 0 && populationBinned.map((entry, index) => {
@@ -293,7 +305,7 @@ export default function CltDiscoveryLab() {
             <CardContent className="h-[300px]">
                <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={sampleMeansBinned} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                    <XAxis dataKey="name" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
+                    <XAxis dataKey="name" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={40} tickFormatter={(v) => v > 0 ? v : ''}/>
                     <Tooltip
                         cursor={{ fill: 'hsla(var(--muted) / 0.1)'}}
