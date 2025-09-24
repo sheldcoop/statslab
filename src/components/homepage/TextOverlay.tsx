@@ -42,19 +42,19 @@ export default function TextOverlay({
       <FirstTextSection scrollYProgress={scrollYProgress} />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.15, 0.25, 0.35, 0.45]}
+        range={[0.125, 0.25, 0.375, 0.5]}
         title="Linear Algebra Gives It Structure"
         subtitle="We introduce vectors and matrices—the language of space and transformation. The chaos begins to form shapes, to align along hidden axes."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.35, 0.45, 0.55, 0.65]}
+        range={[0.375, 0.5, 0.625, 0.75]}
         title="Statistics Finds the Pattern"
         subtitle="Probability and distributions reveal the invisible trends. We learn to listen for the signal within the noise, quantifying uncertainty."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.55, 0.65, 0.75, 0.85]}
+        range={[0.625, 0.75, 0.875, 1.0]}
         title="Time Series Makes It Predict"
         subtitle="The past gains a voice. We analyze sequences, understand rhythms, and begin to forecast the future with confidence."
       />
@@ -73,8 +73,8 @@ const FirstTextSection = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.25], [1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.05, 0.25], [0, 0, -100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.125, 0.25], [1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.125, 0.25], [0, 0, -100]);
 
   return (
     <section className="flex h-screen items-center justify-center">
