@@ -28,22 +28,24 @@ import { Loader2 } from 'lucide-react';
 import { randomLogNormal, randomNormal } from 'd3-random';
 
 // --- Data Generation ---
-const generatePopulationData = (distribution: string, count: number) => {
+const generatePopulationData = (distribution: string, count: number, mean: number, stdDev: number) => {
     switch (distribution) {
       case 'positive-skew':
         return Array.from({ length: count }, randomLogNormal(0, 1.5));
       case 'negative-skew':
-        // Centering it around a value like 10 to ensure most values are positive
         return Array.from({ length: count }, () => 15 - randomLogNormal(0, 1.5)());
       case 'bimodal': {
-        const bimodal = () => (Math.random() < 0.5 ? randomNormal(3, 1.5)() : randomNormal(9, 1.5)());
-        return Array.from({ length: count }, bimodal);
+        const mean1 = mean - stdDev * 1.5;
+        const mean2 = mean + stdDev * 1.5;
+        const dist1 = Array.from({ length: count / 2 }, randomNormal(mean1, stdDev * 0.6));
+        const dist2 = Array.from({ length: count / 2 }, randomNormal(mean2, stdDev * 0.6));
+        return [...dist1, ...dist2];
       }
       case 'uniform':
         return Array.from({ length: count }, () => Math.random() * 12);
       case 'normal':
       default:
-        return Array.from({ length: count }, randomNormal(6, 1.5));
+        return Array.from({ length: count }, randomNormal(mean, stdDev));
     }
 };
 
@@ -53,12 +55,10 @@ const binData = (data: number[] | undefined, numBins: number, domain?: [number, 
     let min = domain ? domain[0] : Math.min(...data);
     let max = domain ? domain[1] : Math.max(...data);
     
-    // For skewed data, outliers can ruin the visualization.
-    // We can cap the max at the 99th percentile for a better view.
     if (!domain) {
         const sortedData = [...data].sort((a, b) => a - b);
         const p99 = sortedData[Math.floor(0.99 * sortedData.length)];
-        if (max > p99 * 1.5) { // Only apply if there are significant outliers
+        if (max > p99 * 1.5) { 
             max = p99;
         }
     }
@@ -103,6 +103,8 @@ const AnalysisStat = ({ label, value, theoreticalValue }: { label: string; value
 
 export default function CltDiscoveryLab() {
   const [populationShape, setPopulationShape] = useState('positive-skew');
+  const [populationMeanParam, setPopulationMeanParam] = useState(6);
+  const [populationStdDevParam, setPopulationStdDevParam] = useState(1.5);
   const [populationData, setPopulationData] = useState<number[]>([]);
   const [isPopulationLoading, setIsPopulationLoading] = useState(true);
 
@@ -141,10 +143,10 @@ export default function CltDiscoveryLab() {
 
   useEffect(() => {
     setIsPopulationLoading(true);
-    const data = generatePopulationData(populationShape, 20000);
+    const data = generatePopulationData(populationShape, 20000, populationMeanParam, populationStdDevParam);
     setPopulationData(data);
     setIsPopulationLoading(false);
-  }, [populationShape]);
+  }, [populationShape, populationMeanParam, populationStdDevParam]);
 
   const { populationMean, populationStdDev } = useMemo(() => {
     if (!populationData || populationData.length === 0) return { populationMean: 0, populationStdDev: 0 };
@@ -155,7 +157,7 @@ export default function CltDiscoveryLab() {
   }, [populationData]);
   
   const populationBinned = useMemo(() => binData(populationData, 50), [populationData]);
-  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans, sampleMeans.length]);
+  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
 
   const runFullSimulation = useCallback(() => {
     if (isSimulating) return;
@@ -197,7 +199,6 @@ export default function CltDiscoveryLab() {
   }, [sampleSize, numSamples, populationData, isSimulating, stopSimulation]);
   
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
       stopSimulation();
     }
@@ -258,6 +259,14 @@ export default function CltDiscoveryLab() {
                               <SelectItem value="normal">Normal</SelectItem>
                           </SelectContent>
                       </Select>
+                  </div>
+                  <div>
+                      <Label>Population Mean: {populationMeanParam}</Label>
+                      <Slider value={[populationMeanParam]} onValueChange={handleParamChange(setPopulationMeanParam)} min={0} max={12} step={0.5} disabled={isSimulating || populationShape !== 'normal'}/>
+                  </div>
+                   <div>
+                      <Label>Population Std. Dev: {populationStdDevParam.toFixed(1)}</Label>
+                      <Slider value={[populationStdDevParam]} onValueChange={handleParamChange(setPopulationStdDevParam)} min={0.5} max={5} step={0.1} disabled={isSimulating || populationShape !== 'normal'}/>
                   </div>
                   <div>
                       <Label>Sample Size: {sampleSize}</Label>
