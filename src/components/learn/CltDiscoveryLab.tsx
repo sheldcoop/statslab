@@ -151,12 +151,12 @@ export default function CltDiscoveryLab() {
   };
 
   const theoreticalCurveData = useMemo(() => {
-      if (sampleMeansBinned.length === 0) return [];
-      const scale = sampleMeans.length * (sampleMeansBinned[0].x1 - sampleMeansBinned[0].x0);
-      return sampleMeansBinned.map(bin => ({
-          x: bin.x0 + (bin.x1 - bin.x0)/2,
-          y: normalPDF(bin.x0 + (bin.x1 - bin.x0)/2, theoreticalMean, theoreticalStdDev) * scale
-      }));
+    if (sampleMeansBinned.length === 0) return [];
+    const scale = sampleMeans.length * (sampleMeansBinned[0].x1 - sampleMeansBinned[0].x0);
+    return sampleMeansBinned.map(bin => ({
+        x: bin.x0 + (bin.x1 - bin.x0)/2,
+        y: normalPDF(bin.x0 + (bin.x1 - bin.x0)/2, theoreticalMean, theoreticalStdDev) * scale
+    }));
   }, [sampleMeansBinned, theoreticalMean, theoreticalStdDev, sampleMeans.length]);
 
   return (
@@ -185,7 +185,7 @@ export default function CltDiscoveryLab() {
                 <div>
                     <Label>Population Shape</Label>
                      <Select value={populationType} onValueChange={handlePopulationChange}>
-                        <SelectTrigger><SelectValue /></SelectValue></SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="skewed">Skewed</SelectItem>
                             <SelectItem value="bimodal">Bimodal</SelectItem>
