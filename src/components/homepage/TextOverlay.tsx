@@ -54,25 +54,25 @@ export default function TextOverlay({
     <div className="pointer-events-none absolute inset-0">
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.1, 0.3]}
+        range={[0.0, 0.25]}
         title="Data is Chaos"
         subtitle="It’s a universe of disconnected points, a symphony without a conductor. Our journey begins by facing this raw, untamed wilderness."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.3, 0.5]}
+        range={[0.25, 0.45]}
         title="Linear Algebra Gives It Structure"
         subtitle="We introduce vectors and matrices—the language of space and transformation. The chaos begins to form shapes, to align along hidden axes."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.5, 0.7]}
+        range={[0.45, 0.65]}
         title="Statistics Finds the Pattern"
         subtitle="Probability and distributions reveal the invisible trends. We learn to listen for the signal within the noise, quantifying uncertainty."
       />
        <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.7, 0.85]}
+        range={[0.65, 0.85]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />

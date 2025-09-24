@@ -96,7 +96,7 @@ const BGChaos = () => (
 
 const ChaosVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number>}) => {
     const logoProgress = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
-    const chaosOpacity = useTransform(scrollYProgress, [0.1, 0.2], [0, 1]);
+    const chaosOpacity = useTransform(scrollYProgress, [0.1, 0.25], [0, 1]);
 
     return (
         <VisualPlaceholder>
@@ -302,13 +302,13 @@ export default function VisualsContainer({
   return (
     <div className="sticky top-0 h-screen w-full overflow-hidden">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.2, 0.4]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.25, 0.45]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.6]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.45, 0.65]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.8]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.65, 0.85]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress} />
@@ -321,20 +321,20 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const range: [number, number] = [0.0, 0.2];
+  const range: [number, number] = [0.0, 0.25];
   const overlap = 0.05;
   const start = range[0];
   const end = range[1];
   
   const opacity = useTransform(
     scrollYProgress,
-    [end - overlap, end],
-    [1, 0]
+    [start, start + overlap, end - overlap, end],
+    [0, 1, 1, 0]
   );
   const scale = useTransform(
     scrollYProgress,
-    [end - overlap, end],
-    [1, 0.95]
+    [start, start + overlap, end - overlap, end],
+    [0.95, 1, 1, 0.95]
   );
 
   return (
