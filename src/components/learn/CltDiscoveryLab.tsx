@@ -14,6 +14,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Label as RechartsLabel,
 } from 'recharts';
 
 import { Button } from '@/components/ui/button';
@@ -81,24 +82,14 @@ const generatePopulationData = (
   }
 };
 
-const binData = (data: number[] | undefined, numBins: number, domain?: [number, number]) => {
+const binData = (data: number[], numBins: number) => {
   if (!data || data.length === 0) return [];
 
-  let [min, max] = domain || [Math.min(...data), Math.max(...data)];
-
-  // For skewed data, we might want to cap the max to avoid extreme outliers distorting the view
-  if (!domain) {
-      const sortedData = [...data].sort((a, b) => a - b);
-      const p99 = sortedData[Math.floor(0.99 * sortedData.length)];
-      if (max > p99 * 1.5) {
-          max = p99;
-      }
-      const p1 = sortedData[Math.floor(0.01 * sortedData.length)];
-       if (min < p1 * 1.5) {
-        min = p1;
-      }
-  }
-
+  const sortedData = [...data].sort((a, b) => a - b);
+  const p01 = sortedData[Math.floor(0.01 * sortedData.length)];
+  const p99 = sortedData[Math.floor(0.99 * sortedData.length)];
+  
+  let [min, max] = [p01, p99];
 
   if (min === max) {
     min = min - 1;
@@ -109,7 +100,7 @@ const binData = (data: number[] | undefined, numBins: number, domain?: [number, 
   if (binSize <= 0) return [];
 
   const bins = Array.from({ length: numBins }, (_, i) => ({
-    name: (min + i * binSize).toFixed(2),
+    x: min + (i + 0.5) * binSize, // Use bin midpoint for x
     value: 0,
     x0: min + i * binSize,
     x1: min + (i + 1) * binSize,
@@ -126,8 +117,9 @@ const binData = (data: number[] | undefined, numBins: number, domain?: [number, 
       }
     }
   }
-  return bins;
+  return bins.map(b => ({x: b.x, value: b.value}));
 };
+
 
 // --- Custom Hooks for Logic Separation ---
 
@@ -289,7 +281,7 @@ const PopulationChart = ({ data, mean, stdDev, isLoading }: { data: number[], me
                 ) : (
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={binnedData} margin={{ top: 5, right: 0, left: 0, bottom: 5 }}>
-                            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
+                            <XAxis dataKey="x" type="number" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => (v > 0 ? v : '')} width={30} />
                             <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]} />
                         </BarChart>
@@ -315,11 +307,12 @@ const SampleMeansChart = ({ sampleMeans, theoreticalMean, theoreticalStdDev, sho
     };
 
     const theoreticalCurveData = useMemo(() => {
-      if (!binnedData.length || !sampleMeans.length || !theoreticalStdDev) return [];
-      const scale = sampleMeans.length * (binnedData[0].x1 - binnedData[0].x0);
+      if (!binnedData.length || binnedData.length < 2 || !sampleMeans.length || !theoreticalStdDev) return [];
+      const binSize = binnedData[1].x - binnedData[0].x;
+      const scale = sampleMeans.length * binSize;
       return binnedData.map(bin => ({
-          x: bin.x0 + (bin.x1 - bin.x0)/2,
-          y: normalPDF(bin.x0 + (bin.x1 - bin.x0)/2, theoreticalMean, theoreticalStdDev) * scale
+          x: bin.x,
+          y: normalPDF(bin.x, theoreticalMean, theoreticalStdDev) * scale
       }));
     }, [binnedData, theoreticalMean, theoreticalStdDev, sampleMeans.length]);
 
@@ -340,9 +333,9 @@ const SampleMeansChart = ({ sampleMeans, theoreticalMean, theoreticalStdDev, sho
                 </AnimatePresence>
             </CardHeader>
             <CardContent className="h-[300px] pl-2 pr-6">
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={binnedData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                        <XAxis dataKey="name" type="number" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
+                        <XAxis dataKey="x" type="number" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={40} tickFormatter={(v) => (v > 0 ? v : '')} />
                         <Tooltip
                             cursor={{ fill: 'hsla(var(--muted) / 0.1)' }}
@@ -351,14 +344,17 @@ const SampleMeansChart = ({ sampleMeans, theoreticalMean, theoreticalStdDev, sho
                                 border: '1px solid hsl(var(--border))',
                                 borderRadius: 'var(--radius)',
                             }}
+                            labelFormatter={(label) => Number(label).toFixed(2)}
                         />
                         <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} maxBarSize={40} animationDuration={isSimulating ? 0 : 300} />
 
                         {showTheoreticalCurve && theoreticalCurveData.length > 0 && theoreticalMean > 0 && (
-                            <ReferenceLine x={theoreticalMean} stroke="hsl(var(--accent))" strokeDasharray="3 3" strokeWidth={2} label={{ value: 'μ', fill: 'hsl(var(--accent))', position: 'insideTop' }} />
+                            <ReferenceLine x={theoreticalMean} stroke="hsl(var(--accent))" strokeDasharray="3 3" strokeWidth={2}>
+                                <RechartsLabel value="μ" fill="hsl(var(--accent))" position="insideTop" />
+                            </ReferenceLine>
                         )}
                         {showTheoreticalCurve && theoreticalCurveData.length > 1 && (
-                            <Line type="monotone" dataKey="y" data={theoreticalCurveData} stroke="hsl(var(--accent))" strokeWidth={2} dot={false} animationDuration={300} />
+                             <Line dataKey="y" data={theoreticalCurveData} type="monotone" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} animationDuration={300} />
                         )}
                     </BarChart>
                 </ResponsiveContainer>
@@ -390,7 +386,7 @@ export default function CltDiscoveryLab() {
     setMean,
     stdDev,
     setStdDev,
-isPopulationLoading,
+    isPopulationLoading,
     populationData,
     populationMean,
     populationStdDev,
@@ -409,12 +405,7 @@ isPopulationLoading,
 
   const theoreticalStdErr = populationStdDev / Math.sqrt(sampleSize);
 
-  const handlePopulationParamChange = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => (values: number[]) => {
-      stopAndClear();
-      setter(values[0] as T);
-  };
-  
-  const handleSimulationParamChange = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => (values: number[]) => {
+  const handleParamChange = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => (values: number[]) => {
       stopAndClear();
       setter(values[0] as T);
   };
@@ -467,19 +458,19 @@ isPopulationLoading,
               </div>
               <div>
                 <Label>Population Mean: {mean}</Label>
-                <Slider value={[mean]} onValueChange={handlePopulationParamChange(setMean)} min={0} max={12} step={0.5} disabled={isSimulating}/>
+                <Slider value={[mean]} onValueChange={handleParamChange(setMean)} min={0} max={12} step={0.5} disabled={isSimulating}/>
               </div>
               <div>
                 <Label>Population Std. Dev: {stdDev.toFixed(1)}</Label>
-                <Slider value={[stdDev]} onValueChange={handlePopulationParamChange(setStdDev)} min={0.5} max={5} step={0.1} disabled={isSimulating} />
+                <Slider value={[stdDev]} onValueChange={handleParamChange(setStdDev)} min={0.5} max={5} step={0.1} disabled={isSimulating} />
               </div>
               <div>
                 <Label>Sample Size: {sampleSize}</Label>
-                <Slider value={[sampleSize]} onValueChange={handleSimulationParamChange(setSampleSize)} min={2} max={200} step={1} disabled={isSimulating} />
+                <Slider value={[sampleSize]} onValueChange={handleParamChange(setSampleSize)} min={2} max={200} step={1} disabled={isSimulating} />
               </div>
               <div>
                 <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
-                <Slider value={[numSamples]} onValueChange={handleSimulationParamChange(setNumSamples)} min={100} max={20000} step={100} disabled={isSimulating}/>
+                <Slider value={[numSamples]} onValueChange={handleParamChange(setNumSamples)} min={100} max={20000} step={100} disabled={isSimulating}/>
               </div>
 
               <div className="space-y-2 pt-2">
