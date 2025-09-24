@@ -302,6 +302,10 @@ const StatisticsPage = () => {
 };
 
 export default function ModulePage({ params }: { params: { slug: string } }) {
+  if (!params || !params.slug) {
+    return null; // or a loading skeleton
+  }
+
   const title = params.slug
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
