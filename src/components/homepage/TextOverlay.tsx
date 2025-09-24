@@ -10,12 +10,12 @@ const TextSection = ({
   subtitle,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number];
+  range: number[];
   title: string;
   subtitle: string;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1]);
-  const y = useTransform(scrollYProgress, range, [100, 0]);
+  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, range, [100, 0, 0, -100]);
 
   return (
     <section className="flex h-screen items-center justify-center">
@@ -39,33 +39,28 @@ export default function TextOverlay({
 }) {
   return (
     <div className="pointer-events-none absolute inset-0">
+      <FirstTextSection scrollYProgress={scrollYProgress} />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.05, 0.15]}
-        title="Data is Chaos"
-        subtitle="It’s a universe of disconnected points, a symphony without a conductor. Our journey begins by facing this raw, untamed wilderness."
-      />
-      <TextSection
-        scrollYProgress={scrollYProgress}
-        range={[0.2, 0.3]}
+        range={[0.2, 0.25, 0.35, 0.4]}
         title="Linear Algebra Gives It Structure"
         subtitle="We introduce vectors and matrices—the language of space and transformation. The chaos begins to form shapes, to align along hidden axes."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.35, 0.45]}
+        range={[0.4, 0.45, 0.55, 0.6]}
         title="Statistics Finds the Pattern"
         subtitle="Probability and distributions reveal the invisible trends. We learn to listen for the signal within the noise, quantifying uncertainty."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.5, 0.6]}
+        range={[0.6, 0.65, 0.75, 0.8]}
         title="Time Series Makes It Predict"
         subtitle="The past gains a voice. We analyze sequences, understand rhythms, and begin to forecast the future with confidence."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.65, 0.75]}
+        range={[0.8, 0.85, 0.95, 1]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
@@ -73,3 +68,30 @@ export default function TextOverlay({
     </div>
   );
 }
+
+// Adjust the first TextSection's range to be visible at the start
+const FirstTextSection = ({
+  scrollYProgress,
+}: {
+  scrollYProgress: MotionValue<number>;
+}) => {
+  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.2], [1, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.2], [0, 0, 0, -100]);
+
+  return (
+    <section className="flex h-screen items-center justify-center">
+      <motion.div
+        style={{ opacity, y }}
+        className="mx-auto max-w-2xl text-center"
+      >
+        <h2 className="font-headline text-5xl font-bold md:text-7xl">
+          Data is Chaos
+        </h2>
+        <p className="mt-4 font-body text-xl text-[#8B949E]">
+          It’s a universe of disconnected points, a symphony without a
+          conductor. Our journey begins by facing this raw, untamed wilderness.
+        </p>
+      </motion.div>
+    </section>
+  );
+};

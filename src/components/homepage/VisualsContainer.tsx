@@ -184,10 +184,10 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number];
+  range: number[];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1]);
+  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
   return <motion.div style={{ opacity }}>{children}</motion.div>;
 };
 
@@ -198,24 +198,36 @@ export default function VisualsContainer({
 }) {
   return (
     <div className="sticky top-0 h-screen w-full">
-      <Visual scrollYProgress={scrollYProgress} range={[0, 0.1]}>
-        <ChaosVisual />
-      </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.1, 0.25]}>
+      <FirstVisual scrollYProgress={scrollYProgress} />
+      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.2, 0.35, 0.4]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.25, 0.4]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.35, 0.4, 0.55, 0.6]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.55]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.55, 0.6, 0.75, 0.8]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.55, 0.7]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.8, 0.95, 1]}>
         <PythonVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.8, 1]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.95, 1, 1, 1]}>
         <ModuleGrid />
       </Visual>
     </div>
   );
 }
+
+//Adjust the first Visual to be visible at the start
+const FirstVisual = ({
+  scrollYProgress,
+}: {
+  scrollYProgress: MotionValue<number>;
+}) => {
+  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.2], [1, 1, 1, 0]);
+  return (
+    <motion.div style={{ opacity }}>
+      <ChaosVisual />
+    </motion.div>
+  );
+};
