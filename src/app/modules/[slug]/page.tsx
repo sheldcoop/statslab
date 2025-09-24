@@ -32,7 +32,7 @@ const sectionVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -42,16 +42,19 @@ const gridVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
+      delayChildren: 0.2,
     },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30, scale: 0.98, filter: 'blur(3px)' },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: 'easeOut' },
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -214,17 +217,23 @@ const StatisticsPage = () => {
                 const Icon = item.icon;
                 return (
                   <motion.div key={item.title} variants={cardVariants}>
-                    <Card className="flex h-full flex-col transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
-                      <CardHeader>
-                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                          <Icon className="h-6 w-6 text-primary" />
-                        </div>
-                        <CardTitle>{item.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex-grow">
-                        <CardDescription>{item.description}</CardDescription>
-                      </CardContent>
-                    </Card>
+                     <motion.div
+                      whileHover={{ scale: 1.04, y: -5 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="h-full"
+                    >
+                      <Card className="flex h-full flex-col border-transparent transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
+                        <CardHeader>
+                          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                            <Icon className="h-6 w-6 text-primary" />
+                          </div>
+                          <CardTitle>{item.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                          <CardDescription>{item.description}</CardDescription>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   </motion.div>
                 );
               })}
@@ -250,10 +259,12 @@ const StatisticsPage = () => {
             experimenting with these concepts right away.
           </p>
           <motion.div
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, boxShadow: '0px 10px 30px -5px hsla(var(--primary), 0.3)' }}
             whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="mt-8 inline-block"
           >
-            <Button size="lg" className="mt-8 font-headline text-lg">
+            <Button size="lg" className="font-headline text-lg shadow-lg shadow-primary/20">
               Launch Terminal <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
