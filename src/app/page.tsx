@@ -12,6 +12,18 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const SceneLinearAlgebra = dynamic(
+  () => import('../components/homepage/SceneLinearAlgebra'),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-full w-full" />,
+  }
+);
+
 
 const GridPanel = ({
   className,
@@ -44,18 +56,23 @@ export default function Home() {
         </header>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
-          <GridPanel className="md:col-span-1 lg:col-span-2">
-            <CardHeader>
+          <GridPanel className="relative md:col-span-1 lg:col-span-2">
+            <CardHeader className="z-10">
               <CardTitle className="flex items-center gap-2">
                 <Pyramid className="text-primary" />
                 Linear Algebra
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="z-10">
               <p className="text-sm text-muted-foreground">
                 Vectors, matrices, and tensors. The language of data.
               </p>
             </CardContent>
+            <Suspense fallback={<Skeleton className="absolute inset-0 h-full w-full" />}>
+              <div className="absolute inset-0 h-full w-full">
+                <SceneLinearAlgebra />
+              </div>
+            </Suspense>
           </GridPanel>
 
           <GridPanel className="md:col-span-1 lg:col-span-2">
