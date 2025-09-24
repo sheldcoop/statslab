@@ -13,10 +13,13 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 
-// Dynamically import the 3D visual component to ensure it's client-only
-const LinearAlgebraVisual = lazy(() => import('@/components/homepage/LinearAlgebraVisual'));
+const LinearAlgebraVisual = dynamic(
+  () => import('@/components/homepage/LinearAlgebraVisual'),
+  { ssr: false }
+);
 
 const GridPanel = ({
   className,
