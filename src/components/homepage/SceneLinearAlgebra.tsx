@@ -2,13 +2,41 @@
 
 import { useRef, useMemo } from 'react';
 import type { MotionValue } from 'framer-motion';
-import { Arrow, Plane } from '@react-three/drei';
+import { Cone, Plane } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { MeshStandardMaterial } from 'three';
 
 interface SceneLinearAlgebraProps {
   opacity: MotionValue<number>;
+}
+
+function Arrow({
+  position,
+  material,
+  length = 1.5,
+  headWidth = 0.5,
+  headLength = 0.5,
+}: {
+  position: [number, number, number];
+  material: THREE.Material;
+  length?: number;
+  headWidth?: number;
+  headLength?: number;
+}) {
+  const bodyLength = length - headLength;
+  return (
+    <group position={position}>
+      <mesh material={material} position={[0, bodyLength / 2, 0]}>
+        <cylinderGeometry args={[0.05, 0.05, bodyLength, 8]} />
+      </mesh>
+      <Cone
+        args={[headWidth / 2, headLength, 16]}
+        material={material}
+        position={[0, length - headLength / 2, 0]}
+      />
+    </group>
+  );
 }
 
 export function SceneLinearAlgebra({ opacity }: SceneLinearAlgebraProps) {
@@ -47,7 +75,6 @@ export function SceneLinearAlgebra({ opacity }: SceneLinearAlgebraProps) {
           <Arrow
             key={`arrow-${x}-${z}`}
             position={[x, 0, z]}
-            args={[new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1.5, 0)]}
             material={material}
             length={1.5}
             headWidth={0.5}
