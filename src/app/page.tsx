@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ArrowRight,
   Calculator,
@@ -13,28 +13,15 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState, Suspense } from 'react';
-import dynamic from 'next/dynamic';
-
-const LinearAlgebraVisual = dynamic(
-  () => import('@/components/homepage/LinearAlgebraVisual'),
-  { ssr: false }
-);
 
 const GridPanel = ({
   className,
   children,
-  onHoverStart,
-  onHoverEnd,
 }: {
   className?: string;
   children: React.ReactNode;
-  onHoverStart?: () => void;
-  onHoverEnd?: () => void;
 }) => (
   <motion.div
-    onHoverStart={onHoverStart}
-    onHoverEnd={onHoverEnd}
     variants={gridItemVariants}
     whileHover={{
       scale: 1.02,
@@ -75,8 +62,6 @@ const gridItemVariants = {
 };
 
 export default function Home() {
-  const [isLinearAlgebraHovered, setIsLinearAlgebraHovered] = useState(false);
-
   return (
     <main className="min-h-screen w-full bg-background font-mono text-foreground">
       <div className="container mx-auto p-4 md:p-8">
@@ -99,34 +84,14 @@ export default function Home() {
           animate="show"
         >
           <div className="md:col-span-1 lg:col-span-2">
-            <GridPanel
-              onHoverStart={() => setIsLinearAlgebraHovered(true)}
-              onHoverEnd={() => setIsLinearAlgebraHovered(false)}
-            >
-              <div className="absolute inset-0 z-0">
-                <AnimatePresence>
-                  {isLinearAlgebraHovered && (
-                     <Suspense fallback={null}>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 0.5 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="h-full w-full"
-                        >
-                          <LinearAlgebraVisual />
-                        </motion.div>
-                     </Suspense>
-                  )}
-                </AnimatePresence>
-              </div>
-              <CardHeader className="z-10">
+            <GridPanel>
+              <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Pyramid className="text-primary" />
                   Linear Algebra
                 </CardTitle>
               </CardHeader>
-              <CardContent className="z-10">
+              <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Vectors, matrices, and tensors. The language of data.
                 </p>
