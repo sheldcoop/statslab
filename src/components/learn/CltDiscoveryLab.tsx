@@ -25,7 +25,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { generateDistribution, DistributionInput } from '@/ai/flows/statistics-flow';
+import { generateDistributionFlow, type DistributionInput } from '@/ai/flows/statistics-flow';
 import { Loader2 } from 'lucide-react';
 
 const binData = (data: number[] | undefined, numBins: number) => {
@@ -92,7 +92,7 @@ export default function CltDiscoveryLab() {
     setSampleMeans([]);
     setCurrentSingleSample([]);
     try {
-        const { data } = await generateDistribution({ ...populationParams, count: 10000 });
+        const { data } = await generateDistributionFlow({ ...populationParams, count: 10000 });
         setPopulationData(data);
     } catch (e) {
         console.error("Failed to fetch population data", e);

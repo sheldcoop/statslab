@@ -3,8 +3,8 @@
  * @fileOverview A statistics utility flow for generating data distributions.
  *
  * - generateDistribution - A function that generates data for a specified statistical distribution.
- * - DistributionInputSchema - The input type for the generateDistribution function.
- * - DistributionOutputSchema - The return type for the generateDistribution function.
+ * - DistributionInput - The input type for the generateDistribution function.
+ * - DistributionOutput - The return type for the generateDistribution function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -15,7 +15,7 @@ import {
   randomBeta,
 } from 'd3-random';
 
-export const DistributionInputSchema = z.object({
+const DistributionInputSchema = z.object({
   distribution: z.enum(['normal', 'uniform', 'beta', 'bimodal', 'positive-skew', 'negative-skew']),
   mean: z.number().optional(),
   stdDev: z.number().optional(),
@@ -26,7 +26,7 @@ export const DistributionInputSchema = z.object({
 
 export type DistributionInput = z.infer<typeof DistributionInputSchema>;
 
-export const DistributionOutputSchema = z.object({
+const DistributionOutputSchema = z.object({
   data: z.array(z.number()),
 });
 
@@ -60,7 +60,7 @@ function generateData(input: DistributionInput): number[] {
 }
 
 
-export const generateDistribution = ai.defineFlow(
+const generateDistribution = ai.defineFlow(
   {
     name: 'generateDistribution',
     inputSchema: DistributionInputSchema,
@@ -71,3 +71,7 @@ export const generateDistribution = ai.defineFlow(
     return { data };
   }
 );
+
+export async function generateDistributionFlow(input: DistributionInput): Promise<DistributionOutput> {
+    return generateDistribution(input);
+}
