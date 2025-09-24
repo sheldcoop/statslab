@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const HomePageClient = dynamic(
-  () => import("@/components/homepage/HomePageClient"),
+const ScrollytellingCanvas = dynamic(
+  () => import("@/components/homepage/ScrollytellingCanvas"),
   {
     ssr: false,
     loading: () => <Skeleton className="h-screen w-screen" />,
@@ -12,5 +12,5 @@ const HomePageClient = dynamic(
 );
 
 export default function CanvasLoader() {
-  return <HomePageClient />;
+  return <ScrollytellingCanvas />;
 }
