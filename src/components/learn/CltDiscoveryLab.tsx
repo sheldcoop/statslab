@@ -25,7 +25,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { generateDistributionFlow, type DistributionInput } from '@/ai/flows/statistics-flow';
 import { Loader2 } from 'lucide-react';
 
 const binData = (data: number[] | undefined, numBins: number) => {
@@ -64,6 +63,8 @@ const SIMULATION_SPEED_MS = 20; // How fast to run the simulation loop
 const BATCH_SIZE = 10; // How many samples to process per animation frame
 
 type Scene = 'intro' | 'single_sample' | 'simulation' | 'lab';
+// A placeholder for the actual API call
+type DistributionInput = any;
 
 export default function CltDiscoveryLab() {
   const [scene, setScene] = useState<Scene>('intro');
@@ -91,14 +92,17 @@ export default function CltDiscoveryLab() {
     setIsPopulationLoading(true);
     setSampleMeans([]);
     setCurrentSingleSample([]);
-    try {
-        const { data } = await generateDistributionFlow({ ...populationParams, count: 10000 });
-        setPopulationData(data);
-    } catch (e) {
-        console.error("Failed to fetch population data", e);
-    } finally {
-        setIsPopulationLoading(false);
-    }
+    // This part is now broken and will be fixed next
+    // try {
+    //     const { data } = await generateDistributionFlow({ ...populationParams, count: 10000 });
+    //     setPopulationData(data);
+    // } catch (e) {
+    //     console.error("Failed to fetch population data", e);
+    // } finally {
+    //     setIsPopulationLoading(false);
+    // }
+    console.log('TODO: Wire up to the real backend API');
+    setIsPopulationLoading(false);
   }, [populationParams]);
 
   useEffect(() => {
