@@ -2,9 +2,12 @@
 
 import {
   ArrowRight,
+  Calculator,
   Code,
+  Cpu,
   LineChart,
-  Target,
+  Pyramid,
+  Sigma,
   TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,83 +38,93 @@ export default function Home() {
               StatSpark
             </h1>
           </div>
-          <div className="text-right text-xs text-muted-foreground">
-            <p>Market Status: OPEN</p>
-            <p>Last Sync: 12:34:56.789 GMT-4</p>
-          </div>
+          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            Launch Terminal <ArrowRight className="ml-2" />
+          </Button>
         </header>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-6">
-          <GridPanel className="md:col-span-4 lg:col-span-4">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                <Target className="text-primary" />
-                Mission Control
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <h2 className="font-headline text-4xl font-bold text-foreground md:text-5xl">
-                Your Intuition Engine
-              </h2>
-              <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-                From data chaos to predictive clarity. StatSpark is a toolkit for quants to develop, test, and deploy complex models with unparalleled speed.
-              </p>
-              <Button size="lg" className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90">
-                Launch Analysis <ArrowRight className="ml-2" />
-              </Button>
-            </CardContent>
-          </GridPanel>
-
-          <GridPanel className="md:col-span-2 lg:col-span-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
+          <GridPanel className="md:col-span-1 lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="text-primary" />
-                AlphaStream
+                <Pyramid className="text-primary" />
+                Linear Algebra
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Live signals and model performance metrics.
+                Vectors, matrices, and tensors. The language of data.
               </p>
-              <div className="mt-4 space-y-2 text-xs">
-                <p><span className="text-green-400">[SIG_BUY]</span> MODEL_A / SPY @ 548.75</p>
-                <p><span className="text-red-400">[SIG_SELL]</span> MODEL_B / BTC @ 68123.45</p>
-                <p><span className="text-green-400">[INFO]</span> MODEL_C P/L: +2.1%</p>
-              </div>
             </CardContent>
           </GridPanel>
 
-          <GridPanel className="md:col-span-2 lg:col-span-3">
-             <CardHeader>
+          <GridPanel className="md:col-span-1 lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sigma className="text-primary" />
+                Statistics & Probability
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Quantifying uncertainty and making sense of distributions.
+              </p>
+            </CardContent>
+          </GridPanel>
+
+          <GridPanel className="md:col-span-1 lg:col-span-2">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Code className="text-primary" />
-                Strategy Backtester
+                Python for Quants
               </CardTitle>
             </CardHeader>
             <CardContent>
-               <p className="text-sm text-muted-foreground">
-                Define and run historical performance tests on your models.
+              <p className="text-sm text-muted-foreground">
+                NumPy, Pandas, SciPy. The tools of the trade.
               </p>
-              <Button variant="outline" className="mt-4">
-                Open Backtester
-              </Button>
             </CardContent>
           </GridPanel>
 
-          <GridPanel className="md:col-span-2 lg:col-span-3">
-             <CardHeader>
+          <GridPanel className="md:col-span-1 lg:col-span-2">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <LineChart className="text-primary" />
-                Portfolio Analytics
+                <TrendingUp className="text-primary" />
+                Time Series Analysis
               </CardTitle>
             </CardHeader>
             <CardContent>
-               <p className="text-sm text-muted-foreground">
-                Visualize risk, return, and attribution across all strategies.
+              <p className="text-sm text-muted-foreground">
+                ARIMA, GARCH, and forecasting market movements.
               </p>
-               <Button variant="outline" className="mt-4">
-                View Dashboard
-              </Button>
+            </CardContent>
+          </GridPanel>
+          
+          <GridPanel className="md:col-span-1 lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Cpu className="text-primary" />
+                Machine Learning
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Building predictive models for financial markets.
+              </p>
+            </CardContent>
+          </GridPanel>
+
+          <GridPanel className="md:col-span-1 lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="text-primary" />
+                Algorithmic Trading
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                From strategy backtesting to live deployment.
+              </p>
             </CardContent>
           </GridPanel>
         </div>
