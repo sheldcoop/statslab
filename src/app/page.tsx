@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from 'framer-motion';
 import {
   ArrowRight,
   Calculator,
@@ -12,8 +13,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-
 
 const GridPanel = ({
   className,
@@ -28,6 +27,28 @@ const GridPanel = ({
     {children}
   </Card>
 );
+
+const gridContainerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const gridItemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  show: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      ease: 'easeOut',
+      duration: 0.3,
+    },
+  },
+};
 
 export default function Home() {
   return (
@@ -45,91 +66,132 @@ export default function Home() {
           </Button>
         </header>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
-          <GridPanel className="relative md:col-span-1 lg:col-span-2">
-            <CardHeader className="z-10">
-              <CardTitle className="flex items-center gap-2">
-                <Pyramid className="text-primary" />
-                Linear Algebra
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="z-10">
-              <p className="text-sm text-muted-foreground">
-                Vectors, matrices, and tensors. The language of data.
-              </p>
-            </CardContent>
-          </GridPanel>
+        <motion.div
+          className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6"
+          variants={gridContainerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          >
+            <GridPanel>
+              <CardHeader className="z-10">
+                <CardTitle className="flex items-center gap-2">
+                  <Pyramid className="text-primary" />
+                  Linear Algebra
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="z-10">
+                <p className="text-sm text-muted-foreground">
+                  Vectors, matrices, and tensors. The language of data.
+                </p>
+              </CardContent>
+            </GridPanel>
+          </motion.div>
 
-          <GridPanel className="md:col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sigma className="text-primary" />
-                Statistics & Probability
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Quantifying uncertainty and making sense of distributions.
-              </p>
-            </CardContent>
-          </GridPanel>
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          >
+            <GridPanel>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sigma className="text-primary" />
+                  Statistics & Probability
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Quantifying uncertainty and making sense of distributions.
+                </p>
+              </CardContent>
+            </GridPanel>
+          </motion.div>
 
-          <GridPanel className="md:col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Code className="text-primary" />
-                Python for Quants
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                NumPy, Pandas, SciPy. The tools of the trade.
-              </p>
-            </CardContent>
-          </GridPanel>
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          >
+            <GridPanel>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="text-primary" />
+                  Python for Quants
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  NumPy, Pandas, SciPy. The tools of the trade.
+                </p>
+              </CardContent>
+            </GridPanel>
+          </motion.div>
 
-          <GridPanel className="md:col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="text-primary" />
-                Time Series Analysis
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                ARIMA, GARCH, and forecasting market movements.
-              </p>
-            </CardContent>
-          </GridPanel>
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          >
+            <GridPanel>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="text-primary" />
+                  Time Series Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  ARIMA, GARCH, and forecasting market movements.
+                </p>
+              </CardContent>
+            </GridPanel>
+          </motion.div>
           
-          <GridPanel className="md:col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cpu className="text-primary" />
-                Machine Learning
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Building predictive models for financial markets.
-              </p>
-            </CardContent>
-          </GridPanel>
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          >
+            <GridPanel>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Cpu className="text-primary" />
+                  Machine Learning
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Building predictive models for financial markets.
+                </p>
+              </CardContent>
+            </GridPanel>
+          </motion.div>
 
-          <GridPanel className="md:col-span-1 lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="text-primary" />
-                Algorithmic Trading
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                From strategy backtesting to live deployment.
-              </p>
-            </CardContent>
-          </GridPanel>
-        </div>
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+          >
+            <GridPanel>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="text-primary" />
+                  Algorithmic Trading
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  From strategy backtesting to live deployment.
+                </p>
+              </CardContent>
+            </GridPanel>
+          </motion.div>
+        </motion.div>
       </div>
       <footer className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/80 p-2 text-center text-xs text-muted-foreground backdrop-blur-sm">
         SYSTEM.NORMAL | Connection secure | Latency: 12ms
