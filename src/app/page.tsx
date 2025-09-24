@@ -1,16 +1,21 @@
 "use client";
 
-import dynamic from 'next/dynamic';
-
-const HomePageClient = dynamic(
-  () => import('@/components/homepage/HomePageClient'),
-  { ssr: false }
-);
+import { useRef } from "react";
+import { useScroll } from "framer-motion";
+import VisualsContainer from "@/components/homepage/VisualsContainer";
+import TextOverlay from "@/components/homepage/TextOverlay";
 
 export default function Home() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: scrollRef,
+    offset: ["start start", "end end"],
+  });
+
   return (
-    <main>
-      <HomePageClient />
+    <main ref={scrollRef} className="relative h-[600vh] w-full">
+      <TextOverlay scrollYProgress={scrollYProgress} />
+      <VisualsContainer scrollYProgress={scrollYProgress} />
     </main>
   );
 }
