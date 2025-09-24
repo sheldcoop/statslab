@@ -22,7 +22,7 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
     const characters = 'StatSpark'.split('');
     const dotPositions: { [key: string]: { x: number; y: number }[] } = {
         'S': [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1},{x:1,y:2},{x:2,y:3},{x:1,y:4},{x:0,y:4}],
-        't': [{x:1,y:0},{x:1,y:1},{x:0,y:2},{x1:1,y:2},{x:2,y:2},{x:1,y:3},{x:1,y:4}],
+        't': [{x:1,y:0},{x:1,y:1},{x:0,y:2},{x:1,y:2},{x:2,y:2},{x:1,y:3},{x:1,y:4}],
         'a': [{x:1,y:0},{x:0,y:1},{x:2,y:1},{x:0,y:2},{x:1,y:2},{x:2,y:2},{x:0,y:3},{x:2,y:3}],
         'S_2': [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1},{x:1,y:2},{x:2,y:3},{x:1,y:4},{x:0,y:4}],
         'p': [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1},{x:2,y:1},{x:0,y:2},{x:1,y:2},{x:2,y:2},{x:0,y:3},{x:0,y:4}],
@@ -32,15 +32,15 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
 
     return (
         <div className="flex items-center justify-center h-full">
-            <div className="grid grid-cols-8 gap-x-4 gap-y-2" style={{ transform: 'scale(2)'}}>
+            <div className="grid grid-cols-9 gap-x-4 gap-y-2" style={{ transform: 'scale(2)'}}>
                 {characters.map((char, charIndex) => (
                     <div key={charIndex} className="w-12 h-20 relative">
                         {(dotPositions[char === 'S' && charIndex > 0 ? 'S_2' : char] || []).map((pos, dotIndex) => {
                             const randomX = React.useMemo(() => (Math.random() - 0.5) * 2000, []);
                             const randomY = React.useMemo(() => (Math.random() - 0.5) * 1000, []);
                             
-                            const x = useTransform(progress, [0, 1], [pos.x * 4, randomX]);
-                            const y = useTransform(progress, [0, 1], [pos.y * 4, randomY]);
+                            const x = useTransform(progress, [0, 1], [0, randomX]);
+                            const y = useTransform(progress, [0, 1], [0, randomY]);
                             const opacity = useTransform(progress, [0, 0.8, 1], [1, 0.5, 0]);
 
                             return (
@@ -99,7 +99,9 @@ const ChaosVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number>
     return (
         <VisualPlaceholder>
             <BGChaos />
-            <StatSparkLogo progress={logoProgress} />
+            <motion.div style={{opacity: useTransform(logoProgress, [0, 1], [1, 0]) }}>
+              <StatSparkLogo progress={logoProgress} />
+            </motion.div>
             <motion.div 
                 style={{ opacity: chaosOpacity }}
                 className="grid h-full w-full grid-cols-20 grid-rows-20"
@@ -281,8 +283,8 @@ export default function VisualsContainer({
 }: {
   scrollYProgress: MotionValue<number>;
 }) {
-  const finalGridY = useTransform(scrollYProgress, [0.85, 1], ['100vh', '0vh']);
-  const finalGridOpacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
+  const finalGridY = useTransform(scrollYProgress, [0.95, 1], ['100vh', '0vh']);
+  const finalGridOpacity = useTransform(scrollYProgress, [0.95, 1], [0, 1]);
 
   return (
     <div className="sticky top-0 h-screen w-full overflow-hidden">
@@ -299,31 +301,13 @@ export default function VisualsContainer({
       <Visual scrollYProgress={scrollYProgress} range={[0.8, 0.85, 0.9, 0.95]}>
         <PythonVisual />
       </Visual>
-       <ModuleGridVisual scrollYProgress={scrollYProgress}>
-        <motion.div style={{ y: finalGridY, opacity: finalGridOpacity }}>
+       <motion.div style={{ y: finalGridY, opacity: finalGridOpacity }} className="absolute inset-0">
+          <ChaosVisual scrollYProgress={scrollYProgress} />
           <ModuleGrid />
-        </motion.div>
-      </ModuleGridVisual>
+      </motion.div>
     </div>
   );
 }
-
-const ModuleGridVisual = ({
-  scrollYProgress,
-  children,
-}: {
-  scrollYProgress: MotionValue<number>;
-  children: React.ReactNode;
-}) => {
-  const opacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
-  return (
-    <motion.div style={{ opacity }} className="absolute inset-0">
-      <ChaosVisual scrollYProgress={scrollYProgress} />
-      {children}
-    </motion.div>
-  );
-};
-
 
 const FirstVisual = ({
   scrollYProgress,
