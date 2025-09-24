@@ -13,6 +13,8 @@ import {
   Waypoints,
   TestTube2,
   BrainCircuit,
+  Scaling,
+  Timer,
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -66,7 +68,7 @@ const pageData: { [key: string]: any } = {
       'Master the art of quantifying uncertainty and finding the signal in the noise. This is the foundation of data-driven decision-making in finance.',
     sections: [
       {
-        title: 'The Core Pillars (Beginner)',
+        title: 'Foundations of Data (Beginner)',
         description:
           'Start with the absolute essentials. These concepts are the building blocks for everything that follows.',
         items: [
@@ -75,6 +77,11 @@ const pageData: { [key: string]: any } = {
             title: 'Descriptive Statistics',
             description:
               'Summarizing data with mean, median, mode, and variance.',
+          },
+          {
+            icon: Database,
+            title: 'Data Visualization',
+            description: 'The power of histograms, box plots, and scatter plots.',
           },
           {
             icon: Sigma,
@@ -87,28 +94,28 @@ const pageData: { [key: string]: any } = {
             description:
               'Normal, Binomial, and Poisson distributions explained.',
           },
-          {
-            icon: Database,
-            title: 'Data Visualization',
-            description: 'The power of histograms, box plots, and scatter plots.',
-          },
         ],
       },
       {
-        title: 'From Theory to Practice (Intermediate)',
+        title: 'Inferential Statistics (Intermediate)',
         description:
-          'Bridge the gap between academic concepts and practical application with hands-on examples.',
+          'Bridge the gap between describing data and making predictions from it. This is the core of practical data science.',
         items: [
           {
             icon: BrainCircuit,
             title: 'Central Limit Theorem',
-            description: 'Why the normal distribution is so important.',
+            description: 'The magic bridge from samples to populations.',
+          },
+          {
+            icon: Scaling,
+            title: 'Sampling and Estimation',
+            description: 'Using samples to estimate population parameters and confidence intervals.',
           },
           {
             icon: TestTube2,
             title: 'Hypothesis Testing',
             description:
-              'Formulating and testing claims with data (p-values, etc.).',
+              'Formulating and testing claims with data (p-values, A/B tests).',
           },
           {
             icon: Waypoints,
@@ -123,14 +130,19 @@ const pageData: { [key: string]: any } = {
         ],
       },
       {
-        title: 'The Quant Toolkit (Advanced)',
+        title: 'Advanced Financial Modeling (Advanced)',
         description:
-          'Explore specialized statistical methods essential for modern quantitative finance.',
+          'Explore specialized methods essential for modern quantitative finance.',
         items: [
           {
             icon: Cpu,
             title: 'Monte Carlo Simulation',
             description: 'Modeling outcomes for complex, random systems.',
+          },
+          {
+            icon: Timer,
+            title: 'Time Series Analysis',
+            description: 'Analyzing data points indexed in time (stationarity, ARIMA).',
           },
           {
             icon: BrainCircuit,
@@ -211,7 +223,7 @@ const StatisticsPage = () => {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
-              className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              className="mx-auto grid max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
             >
               {section.items.map((item: any) => {
                 const Icon = item.icon;
