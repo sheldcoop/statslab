@@ -184,10 +184,10 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number, number, number];
+  range: [number, number];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [range[0], (range[0] + range[1]) / 2, range[1]], [0, 1, 0]);
   return <motion.div style={{ opacity }}>{children}</motion.div>;
 };
 
@@ -199,16 +199,16 @@ export default function VisualsContainer({
   return (
     <div className="sticky top-0 h-screen w-full">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.35, 0.45]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.2, 0.4]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.35, 0.45, 0.55, 0.65]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.6]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.55, 0.65, 0.75, 0.85]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.8]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.85, 0.95, 1.0]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.8, 0.95]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress}>
@@ -225,8 +225,13 @@ const ModuleGridVisual = ({
   scrollYProgress: MotionValue<number>;
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0.95, 1.0], [0, 1]);
-  return <motion.div style={{ opacity }}>{children}</motion.div>;
+  const opacity = useTransform(scrollYProgress, [0.9, 1.0], [0, 1]);
+  return (
+    <motion.div style={{ opacity }}>
+      <ChaosVisual /> 
+      {children}
+    </motion.div>
+  );
 };
 
 //Adjust the first Visual to be visible at the start
@@ -235,7 +240,7 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.25], [1, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.1, 0.2], [1, 1, 0]);
   return (
     <motion.div style={{ opacity }}>
       <ChaosVisual />
