@@ -79,6 +79,34 @@ const footerVariants = {
     }
 }
 
+const CardBackground = () => (
+  <div className="absolute inset-0 z-0 overflow-hidden rounded-lg">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute h-40 w-40 rounded-full bg-secondary/5 opacity-50"
+        initial={{
+          x: `${Math.random() * 100}%`,
+          y: `${Math.random() * 100}%`,
+        }}
+        animate={{
+          x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
+          y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.3, 0.1],
+        }}
+        transition={{
+          duration: Math.random() * 10 + 10,
+          repeat: Infinity,
+          repeatType: 'reverse',
+          ease: 'easeInOut',
+        }}
+      />
+    ))}
+  </div>
+);
+
+
 export default function ModuleGrid() {
   return (
     <div className="flex h-screen w-full items-center justify-center bg-[#0D1117] p-4 md:p-8">
@@ -119,17 +147,20 @@ export default function ModuleGrid() {
                   boxShadow: '0 0 25px hsl(var(--secondary) / 0.2)',
                   transition: { duration: 0.2, ease: 'easeOut' },
                 }}
-                className="relative cursor-pointer rounded-lg border-2 border-[#21262d] bg-[#161B22] p-6 text-left"
+                className="relative cursor-pointer overflow-hidden rounded-lg border-2 border-[#21262d] bg-[#161B22] p-6 text-left"
               >
-                <div className="mb-4">
-                  <Icon className="h-8 w-8 text-secondary" />
+                <CardBackground />
+                <div className="relative z-10">
+                    <div className="mb-4">
+                        <Icon className="h-8 w-8 text-secondary" />
+                    </div>
+                    <h3 className="font-headline text-2xl font-bold">
+                        {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-[#8B949E]">
+                        {item.description}
+                    </p>
                 </div>
-                <h3 className="font-headline text-2xl font-bold">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm text-[#8B949E]">
-                  {item.description}
-                </p>
               </motion.div>
             );
           })}
