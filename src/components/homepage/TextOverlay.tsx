@@ -42,25 +42,25 @@ export default function TextOverlay({
       <FirstTextSection scrollYProgress={scrollYProgress} />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.2, 0.25, 0.35, 0.4]}
+        range={[0.15, 0.25, 0.35, 0.45]}
         title="Linear Algebra Gives It Structure"
         subtitle="We introduce vectors and matrices—the language of space and transformation. The chaos begins to form shapes, to align along hidden axes."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.4, 0.45, 0.55, 0.6]}
+        range={[0.35, 0.45, 0.55, 0.65]}
         title="Statistics Finds the Pattern"
         subtitle="Probability and distributions reveal the invisible trends. We learn to listen for the signal within the noise, quantifying uncertainty."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.6, 0.65, 0.75, 0.8]}
+        range={[0.55, 0.65, 0.75, 0.85]}
         title="Time Series Makes It Predict"
         subtitle="The past gains a voice. We analyze sequences, understand rhythms, and begin to forecast the future with confidence."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.8, 0.85, 0.95, 1.0]}
+        range={[0.75, 0.85, 0.95, 1.0]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
@@ -75,8 +75,8 @@ const FirstTextSection = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.2], [1, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.2], [0, 0, 0, -100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.25], [1, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.05, 0.15, 0.25], [0, 0, 0, -100]);
 
   return (
     <section className="flex h-screen items-center justify-center">
