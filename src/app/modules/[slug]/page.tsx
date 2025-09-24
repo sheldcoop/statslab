@@ -77,22 +77,26 @@ const pageData: { [key: string]: any } = {
             title: 'Descriptive Statistics',
             description:
               'Summarizing data with mean, median, mode, and variance.',
+            href: '/learn/statistics/descriptive-statistics',
           },
           {
             icon: Database,
             title: 'Data Visualization',
             description: 'The power of histograms, box plots, and scatter plots.',
+            href: '/learn/statistics/data-visualization',
           },
           {
             icon: Sigma,
             title: 'Probability Theory',
             description: 'Understanding the laws of chance and likelihood.',
+            href: '/learn/statistics/probability-theory',
           },
           {
             icon: TrendingUp,
             title: 'Common Distributions',
             description:
               'Normal, Binomial, and Poisson distributions explained.',
+            href: '/learn/statistics/common-distributions',
           },
         ],
       },
@@ -105,27 +109,32 @@ const pageData: { [key: string]: any } = {
             icon: BrainCircuit,
             title: 'Central Limit Theorem',
             description: 'The magic bridge from samples to populations.',
+            href: '/learn/statistics/central-limit-theorem',
           },
           {
             icon: Scaling,
             title: 'Sampling and Estimation',
             description: 'Using samples to estimate population parameters and confidence intervals.',
+            href: '/learn/statistics/sampling-and-estimation',
           },
           {
             icon: TestTube2,
             title: 'Hypothesis Testing',
             description:
               'Formulating and testing claims with data (p-values, A/B tests).',
+            href: '/learn/statistics/hypothesis-testing',
           },
           {
             icon: Waypoints,
             title: 'Regression Analysis',
             description: 'Modeling the relationship between variables.',
+            href: '/learn/statistics/regression-analysis',
           },
           {
             icon: Variable,
             title: 'Correlation vs. Causation',
             description: 'A critical distinction for any data scientist.',
+            href: '/learn/statistics/correlation-vs-causation',
           },
         ],
       },
@@ -138,21 +147,25 @@ const pageData: { [key: string]: any } = {
             icon: Cpu,
             title: 'Monte Carlo Simulation',
             description: 'Modeling outcomes for complex, random systems.',
+            href: '/learn/statistics/monte-carlo-simulation',
           },
           {
             icon: Timer,
             title: 'Time Series Analysis',
             description: 'Analyzing data points indexed in time (stationarity, ARIMA).',
+            href: '/learn/statistics/time-series-analysis',
           },
           {
             icon: BrainCircuit,
             title: 'Bayesian Statistics',
             description: 'Updating beliefs in light of new evidence.',
+            href: '/learn/statistics/bayesian-statistics',
           },
           {
             icon: FunctionSquare,
             title: 'Stochastic Processes',
             description: 'Understanding random walks and time-dependent systems.',
+            href: '/learn/statistics/stochastic-processes',
           },
         ],
       },
@@ -228,25 +241,27 @@ const StatisticsPage = () => {
               {section.items.map((item: any) => {
                 const Icon = item.icon;
                 return (
-                  <motion.div key={item.title} variants={cardVariants}>
-                     <motion.div
-                      whileHover={{ scale: 1.04, y: -5 }}
-                      transition={{ duration: 0.2, ease: 'easeOut' }}
-                      className="h-full"
-                    >
-                      <Card className="flex h-full flex-col border-transparent transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
-                        <CardHeader>
-                          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                            <Icon className="h-6 w-6 text-primary" />
-                          </div>
-                          <CardTitle>{item.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-grow">
-                          <CardDescription>{item.description}</CardDescription>
-                        </CardContent>
-                      </Card>
+                  <Link href={item.href} key={item.title} className="block h-full">
+                    <motion.div variants={cardVariants}>
+                       <motion.div
+                        whileHover={{ scale: 1.04, y: -5 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="h-full"
+                      >
+                        <Card className="flex h-full flex-col border-transparent transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
+                          <CardHeader>
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                              <Icon className="h-6 w-6 text-primary" />
+                            </div>
+                            <CardTitle>{item.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="flex-grow">
+                            <CardDescription>{item.description}</CardDescription>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
+                  </Link>
                 );
               })}
             </motion.div>
