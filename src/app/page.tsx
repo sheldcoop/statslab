@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 
 const GridPanel = ({
   className,
@@ -20,24 +21,30 @@ const GridPanel = ({
 }: {
   className?: string;
   children: React.ReactNode;
-}) => (
-  <motion.div
-    variants={gridItemVariants}
-    whileHover={{
-      scale: 1.02,
-      borderColor: 'hsl(var(--primary))',
-      boxShadow: '0 0 15px hsl(var(--primary) / 0.5)',
-      transition: { duration: 0.3 },
-    }}
-    className="relative rounded-lg border border-transparent"
-  >
-    <Card
-      className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 ${className}`}
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      variants={gridItemVariants}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{
+        scale: 1.02,
+        borderColor: 'hsl(var(--primary))',
+        boxShadow: '0 0 20px hsl(var(--primary) / 0.4)',
+        transition: { duration: 0.3 },
+      }}
+      className="relative rounded-lg border-2 border-transparent"
     >
-      {children}
-    </Card>
-  </motion.div>
-);
+      <Card
+        className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 ${className}`}
+      >
+        {children}
+      </Card>
+    </motion.div>
+  );
+};
 
 const gridContainerVariants = {
   hidden: { opacity: 0 },
@@ -61,7 +68,36 @@ const gridItemVariants = {
   },
 };
 
+const AnimatedIcon = ({ isHovered, children }: { isHovered: boolean, children: React.ReactNode }) => {
+  return (
+    <motion.div
+      animate={{
+        scale: isHovered ? 1.1 : 1,
+        rotate: isHovered ? 5 : 0,
+      }}
+      transition={{ type: 'spring', stiffness: 300, damping: 10 }}
+    >
+      {children}
+    </motion.div>
+  )
+};
+
 export default function Home() {
+  const [hoveredStates, setHoveredStates] = useState(Array(6).fill(false));
+
+  const handleHoverStart = (index: number) => {
+    const newHoveredStates = [...hoveredStates];
+    newHoveredStates[index] = true;
+    setHoveredStates(newHoveredStates);
+  };
+
+  const handleHoverEnd = (index: number) => {
+    const newHoveredStates = [...hoveredStates];
+    newHoveredStates[index] = false;
+    setHoveredStates(newHoveredStates);
+  };
+
+
   return (
     <main className="min-h-screen w-full bg-background font-mono text-foreground">
       <div className="container mx-auto p-4 md:p-8">
@@ -83,11 +119,18 @@ export default function Home() {
           initial="hidden"
           animate="show"
         >
-          <div className="md:col-span-1 lg:col-span-2">
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            onHoverStart={() => handleHoverStart(0)}
+            onHoverEnd={() => handleHoverEnd(0)}
+          >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Pyramid className="text-primary" />
+                  <AnimatedIcon isHovered={hoveredStates[0]}>
+                    <Pyramid className="text-primary" />
+                  </AnimatedIcon>
                   Linear Algebra
                 </CardTitle>
               </CardHeader>
@@ -97,13 +140,20 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </div>
+          </motion.div>
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            onHoverStart={() => handleHoverStart(1)}
+            onHoverEnd={() => handleHoverEnd(1)}
+          >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Sigma className="text-primary" />
+                   <AnimatedIcon isHovered={hoveredStates[1]}>
+                    <Sigma className="text-primary" />
+                  </AnimatedIcon>
                   Statistics & Probability
                 </CardTitle>
               </CardHeader>
@@ -113,13 +163,20 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </div>
+          </motion.div>
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            onHoverStart={() => handleHoverStart(2)}
+            onHoverEnd={() => handleHoverEnd(2)}
+          >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Code className="text-primary" />
+                  <AnimatedIcon isHovered={hoveredStates[2]}>
+                    <Code className="text-primary" />
+                  </AnimatedIcon>
                   Python for Quants
                 </CardTitle>
               </CardHeader>
@@ -129,13 +186,20 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </div>
+          </motion.div>
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            onHoverStart={() => handleHoverStart(3)}
+            onHoverEnd={() => handleHoverEnd(3)}
+          >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="text-primary" />
+                  <AnimatedIcon isHovered={hoveredStates[3]}>
+                    <TrendingUp className="text-primary" />
+                  </AnimatedIcon>
                   Time Series Analysis
                 </CardTitle>
               </CardHeader>
@@ -145,13 +209,20 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </div>
+          </motion.div>
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            onHoverStart={() => handleHoverStart(4)}
+            onHoverEnd={() => handleHoverEnd(4)}
+          >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Cpu className="text-primary" />
+                  <AnimatedIcon isHovered={hoveredStates[4]}>
+                    <Cpu className="text-primary" />
+                  </AnimatedIcon>
                   Machine Learning
                 </CardTitle>
               </CardHeader>
@@ -161,13 +232,20 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </div>
+          </motion.div>
 
-          <div className="md:col-span-1 lg:col-span-2">
+          <motion.div
+            className="md:col-span-1 lg:col-span-2"
+            variants={gridItemVariants}
+            onHoverStart={() => handleHoverStart(5)}
+            onHoverEnd={() => handleHoverEnd(5)}
+          >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calculator className="text-primary" />
+                  <AnimatedIcon isHovered={hoveredStates[5]}>
+                    <Calculator className="text-primary" />
+                  </AnimatedIcon>
                   Algorithmic Trading
                 </CardTitle>
               </CardHeader>
@@ -177,7 +255,7 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
       <footer className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/80 p-2 text-center text-xs text-muted-foreground backdrop-blur-sm">
