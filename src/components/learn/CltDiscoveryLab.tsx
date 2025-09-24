@@ -27,8 +27,6 @@ import { Label } from '../ui/label';
 import { Loader2 } from 'lucide-react';
 import { randomLogNormal, randomNormal } from 'd3-random';
 
-type Scene = 'intro' | 'single_sample' | 'simulation' | 'lab';
-
 // --- Data Generation ---
 const generatePopulationData = (distribution: string, count: number) => {
     switch (distribution) {
@@ -91,32 +89,48 @@ const AnalysisStat = ({ label, value, theoreticalValue }: { label: string; value
   );
 
 export default function CltDiscoveryLab() {
-  const [scene, setScene] = useState<Scene>('intro');
   const [populationShape, setPopulationShape] = useState('positive-skew');
   const [populationData, setPopulationData] = useState<number[]>([]);
   const [isPopulationLoading, setIsPopulationLoading] = useState(true);
 
   const [sampleSize, setSampleSize] = useState(30);
-  const [numSamples, setNumSamples] = useState(5000);
+  const [numSamples, setNumSamples] = useState(2500);
   const [isSimulating, setIsSimulating] = useState(false);
 
   const [sampleMeans, setSampleMeans] = useState<number[]>([]);
   const [showTheoretical, setShowTheoretical] = useState(false);
 
-  const simulationRef = useRef<{ stop: boolean, intervalId?: number }>({ stop: false });
+  const simulationRef = useRef<{ stop: boolean, id?: number }>({ stop: false });
 
-  const fetchPopulationData = useCallback(async () => {
-    setIsPopulationLoading(true);
+  const stopSimulation = useCallback(() => {
+    simulationRef.current.stop = true;
+    if (simulationRef.current.id) {
+      cancelAnimationFrame(simulationRef.current.id);
+      simulationRef.current.id = undefined;
+    }
+    setIsSimulating(false);
+  }, []);
+
+  const clearResults = useCallback(() => {
+    stopSimulation();
     setSampleMeans([]);
+  }, [stopSimulation]);
+  
+  const handlePopulationChange = (newShape: string) => {
+      setPopulationShape(newShape);
+      clearResults();
+  }
+
+  const handleParamChange = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => (value: T) => {
+    clearResults();
+    setter(value);
+  }
+
+  useEffect(() => {
+    setIsPopulationLoading(true);
     const data = generatePopulationData(populationShape, 10000);
     setPopulationData(data);
     setIsPopulationLoading(false);
-    setScene('intro');
-  }, [populationShape]);
-
-  useEffect(() => {
-    fetchPopulationData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [populationShape]);
 
   const { populationMean, populationStdDev, populationDomain } = useMemo(() => {
@@ -131,17 +145,13 @@ export default function CltDiscoveryLab() {
   const populationBinned = useMemo(() => binData(populationData, 40), [populationData]);
   const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40, populationDomain), [sampleMeans, populationDomain]);
 
-  const runSingleSample = () => {
-    const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
-    const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
-    setSampleMeans([mean]);
-    setScene('single_sample');
-  }
-
   const runFullSimulation = useCallback(() => {
     if (isSimulating) return;
-    setIsSimulating(true);
+    
+    stopSimulation();
     setSampleMeans([]);
+    setIsSimulating(true);
+
     simulationRef.current.stop = false;
 
     let means: number[] = [];
@@ -152,11 +162,10 @@ export default function CltDiscoveryLab() {
     const simulationStep = () => {
       if (simulationRef.current.stop || currentBatch >= totalBatches) {
         setIsSimulating(false);
-        if(simulationRef.current.intervalId) {
-            cancelAnimationFrame(simulationRef.current.intervalId);
-            simulationRef.current.intervalId = undefined;
+        if(simulationRef.current.id) {
+            cancelAnimationFrame(simulationRef.current.id);
+            simulationRef.current.id = undefined;
         }
-        setScene('lab');
         return;
       }
   
@@ -169,21 +178,18 @@ export default function CltDiscoveryLab() {
       setSampleMeans(means);
   
       currentBatch++;
-      simulationRef.current.intervalId = requestAnimationFrame(simulationStep);
+      simulationRef.current.id = requestAnimationFrame(simulationStep);
     };
   
-    simulationRef.current.intervalId = requestAnimationFrame(simulationStep);
-  }, [sampleSize, numSamples, populationData, isSimulating]);
+    simulationRef.current.id = requestAnimationFrame(simulationStep);
+  }, [sampleSize, numSamples, populationData, isSimulating, stopSimulation]);
   
-  const handleReset = useCallback(() => {
-    simulationRef.current.stop = true;
-    if (simulationRef.current.intervalId) {
-      cancelAnimationFrame(simulationRef.current.intervalId);
-      simulationRef.current.intervalId = undefined;
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      stopSimulation();
     }
-    setIsSimulating(false);
-    fetchPopulationData();
-  }, [fetchPopulationData]);
+  }, [stopSimulation]);
 
 
   const { simulatedMean, simulatedStdDev } = useMemo(() => {
@@ -210,32 +216,14 @@ export default function CltDiscoveryLab() {
       }));
   }, [sampleMeansBinned, theoreticalMean, theoreticalStdDev, sampleMeans.length]);
   
+  const showAnalysis = sampleMeans.length > 1;
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={scene}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="text-center"
-            >
-                {scene === 'intro' && (
-                    <h2 className="font-headline text-3xl md:text-4xl">If we take an average from this weird data, what will it look like?</h2>
-                )}
-                {scene === 'single_sample' && (
-                    <h2 className="font-headline text-3xl md:text-4xl">Okay, that's one average. Not very useful. What if we did this 5,000 times?</h2>
-                )}
-                {(scene === 'simulation' || scene === 'lab') && (
-                    <>
-                        <h2 className="font-headline text-4xl md:text-5xl text-primary">From chaos comes order.</h2>
-                        <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">This is the Central Limit Theorem. Notice how the distribution of sample averages forms a perfect bell curve, no matter how chaotic the original population is.</p>
-                    </>
-                )}
-            </motion.div>
-        </AnimatePresence>
+      <div className="text-center">
+        <h2 className="font-headline text-4xl md:text-5xl text-primary">The Discovery Lab</h2>
+        <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">From chaos comes order. Change the population, adjust the sample size, and see how the Central Limit Theorem works its magic every time.</p>
+      </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* === CONTROLS === */}
@@ -245,61 +233,40 @@ export default function CltDiscoveryLab() {
                 <CardTitle>The Laboratory</CardTitle>
                 <CardDescription>The engine of discovery.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <AnimatePresence>
-                    {(scene === 'lab') && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="space-y-6 overflow-hidden"
-                        >
-                            <div>
-                                <Label>Population Shape</Label>
-                                <Select value={populationShape} onValueChange={setPopulationShape} disabled={isSimulating}>
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="positive-skew">Skewed (Positive)</SelectItem>
-                                        <SelectItem value="negative-skew">Skewed (Negative)</SelectItem>
-                                        <SelectItem value="bimodal">Bimodal</SelectItem>
-                                        <SelectItem value="uniform">Uniform</SelectItem>
-                                        <SelectItem value="normal">Normal</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Sample Size: {sampleSize}</Label>
-                                <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} disabled={isSimulating}/>
-                            </div>
-                            <div>
-                                <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
-                                <Slider value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={20000} step={100} disabled={isSimulating} />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+              <CardContent className="space-y-6 pt-4">
+                  <div>
+                      <Label>Population Shape</Label>
+                      <Select value={populationShape} onValueChange={handlePopulationChange} disabled={isSimulating}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="positive-skew">Skewed (Positive)</SelectItem>
+                              <SelectItem value="negative-skew">Skewed (Negative)</SelectItem>
+                              <SelectItem value="bimodal">Bimodal</SelectItem>
+                              <SelectItem value="uniform">Uniform</SelectItem>
+                              <SelectItem value="normal">Normal</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
+                  <div>
+                      <Label>Sample Size: {sampleSize}</Label>
+                      <Slider value={[sampleSize]} onValueChange={handleParamChange(setSampleSize)} min={2} max={200} step={1} disabled={isSimulating}/>
+                  </div>
+                  <div>
+                      <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
+                      <Slider value={[numSamples]} onValueChange={handleParamChange(setNumSamples)} min={100} max={20000} step={100} disabled={isSimulating} />
+                  </div>
                 
-                <div className="space-y-2">
-                    {scene === 'intro' && <Button onClick={runSingleSample} className="w-full">Take One Sample</Button>}
-                    {scene === 'single_sample' && <Button onClick={() => { setScene('simulation'); runFullSimulation(); }} className="w-full">Run the Simulation</Button>}
-                    {(scene === 'simulation' || scene === 'lab') && <Button onClick={runFullSimulation} disabled={isSimulating} className="w-full">
+                <div className="space-y-2 pt-2">
+                    <Button onClick={runFullSimulation} disabled={isSimulating} className="w-full">
                         {isSimulating ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Simulating...</>) : 'Run New Simulation'}
-                    </Button>}
-                    {(scene === 'lab') && <Button onClick={handleReset} className="w-full" variant="outline">Reset</Button>}
+                    </Button>
+                    <Button onClick={clearResults} className="w-full" variant="outline" disabled={isSimulating}>Reset</Button>
                 </div>
 
-                <AnimatePresence>
-                    {scene === 'lab' && (
-                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex items-center space-x-2 pt-4"
-                        >
-                            <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
-                            <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                <div className="flex items-center space-x-2 pt-4">
+                    <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
+                    <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
+                </div>
               </CardContent>
             </Card>
         </div>
@@ -330,9 +297,19 @@ export default function CltDiscoveryLab() {
           <Card>
              <CardHeader>
                 <CardTitle>Distribution of Sample Averages</CardTitle>
-                <CardDescription>
-                    {sampleMeans.length > 1 ? `Analysis of ${sampleMeans.length.toLocaleString()} sample averages.` : 'A single sample average. Not very informative... yet.'}
-                </CardDescription>
+                <AnimatePresence>
+                {showAnalysis && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <CardDescription>
+                      Analysis of {sampleMeans.length.toLocaleString()} sample averages.
+                    </CardDescription>
+                  </motion.div>
+                )}
+                </AnimatePresence>
             </CardHeader>
             <CardContent className="h-[300px] pl-2 pr-6">
                <ResponsiveContainer width="100%" height={300}>
@@ -372,12 +349,21 @@ export default function CltDiscoveryLab() {
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
-             {scene === 'lab' && sampleMeans.length > 1 && (
-              <CardContent className="border-t pt-4 space-y-2">
-                 <AnalysisStat label="Simulated Mean" value={simulatedMean} theoreticalValue={theoreticalMean} />
-                 <AnalysisStat label="Simulated Std. Error" value={simulatedStdDev} theoreticalValue={theoreticalStdDev} />
-              </CardContent>
+            <AnimatePresence>
+             {showAnalysis && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto', transition: { delay: 0.3 } }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <CardContent className="border-t pt-4 space-y-2">
+                   <AnalysisStat label="Simulated Mean" value={simulatedMean} theoreticalValue={theoreticalMean} />
+                   <AnalysisStat label="Simulated Std. Error" value={simulatedStdDev} theoreticalValue={theoreticalStdDev} />
+                </CardContent>
+              </motion.div>
             )}
+            </AnimatePresence>
           </Card>
         </div>
       </div>
