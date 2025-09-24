@@ -68,7 +68,7 @@ const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
 
 
 const BGChaos = () => (
-    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20">
+    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-30">
       <svg width="100%" height="100%">
         <defs>
           <pattern
@@ -95,8 +95,8 @@ const BGChaos = () => (
   );
 
 const ChaosVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number>}) => {
-    const logoProgress = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
-    const chaosOpacity = useTransform(logoProgress, [0.5, 1], [0, 1]);
+    const logoProgress = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
+    const chaosOpacity = useTransform(scrollYProgress, [0.1, 0.2], [0, 1]);
 
     return (
         <VisualPlaceholder>
@@ -109,7 +109,7 @@ const ChaosVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number>
                 {Array.from({ length: 400 }).map((_, i) => (
                     <motion.div
                         key={i}
-                        className="h-1 w-1 rounded-full bg-muted/20"
+                        className="h-1 w-1 rounded-full bg-muted/50"
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{
                             scale: Math.random() * 1.2 + 0.1,
@@ -135,7 +135,7 @@ const LinearAlgebraVisual = () => (
       width="200"
       height="200"
       viewBox="-100 -100 200 200"
-      className="opacity-50"
+      className="opacity-70"
     >
       {/* Axes */}
       <line
@@ -217,7 +217,7 @@ const StatisticsVisual = () => (
       width="200"
       height="100"
       viewBox="0 0 200 100"
-      className="opacity-20"
+      className="opacity-50"
       preserveAspectRatio="none"
     >
       <motion.path
@@ -241,7 +241,7 @@ const StatisticsVisual = () => (
 const PythonVisual = () => (
   <VisualPlaceholder>
     <motion.code
-      className="font-headline text-4xl text-primary opacity-30"
+      className="font-headline text-4xl text-primary opacity-50"
       initial={{ opacity: 0.3 }}
       animate={{ opacity: [0.3, 0.8, 0.3] }}
       transition={{
@@ -282,12 +282,12 @@ const Visual = ({
 };
 
 const ModuleGridVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) => {
-    const y = useTransform(scrollYProgress, [0.8, 1], ['100vh', '0vh']);
-    const opacity = useTransform(scrollYProgress, [0.8, 1], [0, 1]);
+    const y = useTransform(scrollYProgress, [0.85, 1], ['100vh', '0vh']);
+    const opacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
 
     return (
         <motion.div style={{ y, opacity }} className="absolute inset-0">
-            <ChaosVisual scrollYProgress={scrollYProgress}/>
+            <BGChaos />
             <ModuleGrid />
         </motion.div>
     );
