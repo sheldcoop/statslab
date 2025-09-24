@@ -181,8 +181,8 @@ const usePopulation = (
         case 'positive-skew':
           return Array.from({ length: count }, randomLogNormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)))));
         case 'negative-skew':
-          const logNormal = randomLogNormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2))));
-          return Array.from({ length: count }, () => mean * 2 - logNormal());
+          const logNormalGen = randomLogNormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2))));
+          return Array.from({ length: count }, () => mean * 2 - logNormalGen());
         case 'bimodal': {
           const mean1 = mean - stdDev * 1.5;
           const mean2 = mean + stdDev * 1.5;
@@ -239,11 +239,10 @@ const useSimulation = (
     
         let means: number[] = [];
         const totalBatches = animationSpeed;
-        const batchSize = Math.max(1, Math.ceil(numSamples / totalBatches));
-        let currentBatch = 0;
+        const batchSize = 1;
     
         const simulationStep = () => {
-          if (simulationRef.current.stop || currentBatch * batchSize >= numSamples) {
+          if (simulationRef.current.stop || means.length >= numSamples) {
             setIsSimulating(false);
             simulationRef.current.id = undefined;
             return;
@@ -260,7 +259,6 @@ const useSimulation = (
           means = [...means, ...batchMeans];
           setSampleMeans(means);
     
-          currentBatch++;
           simulationRef.current.id = requestAnimationFrame(simulationStep);
         };
     
