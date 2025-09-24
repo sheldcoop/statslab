@@ -16,6 +16,55 @@ const VisualPlaceholder = ({
   </div>
 );
 
+
+// --- Logo Component ---
+const StatSparkLogo = ({ progress }: { progress: MotionValue<number> }) => {
+    const characters = 'StatSpark'.split('');
+    const dotPositions: { [key: string]: { x: number; y: number }[] } = {
+        'S': [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1},{x:1,y:2},{x:2,y:3},{x:1,y:4},{x:0,y:4}],
+        't': [{x:1,y:0},{x:1,y:1},{x:0,y:2},{x1:1,y:2},{x:2,y:2},{x:1,y:3},{x:1,y:4}],
+        'a': [{x:1,y:0},{x:0,y:1},{x:2,y:1},{x:0,y:2},{x:1,y:2},{x:2,y:2},{x:0,y:3},{x:2,y:3}],
+        'S_2': [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1},{x:1,y:2},{x:2,y:3},{x:1,y:4},{x:0,y:4}],
+        'p': [{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:0,y:1},{x:2,y:1},{x:0,y:2},{x:1,y:2},{x:2,y:2},{x:0,y:3},{x:0,y:4}],
+        'r': [{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:0,y:2},{x:1,y:2},{x:2,y:3},{x:2,y:4}],
+        'k': [{x:0,y:0},{x:2,y:0},{x:0,y:1},{x:1,y:2},{x:0,y:3},{x:2,y:4},{x:0,y:4}],
+    };
+
+    return (
+        <div className="flex items-center justify-center h-full">
+            <div className="grid grid-cols-8 gap-x-4 gap-y-2" style={{ transform: 'scale(2)'}}>
+                {characters.map((char, charIndex) => (
+                    <div key={charIndex} className="w-12 h-20 relative">
+                        {(dotPositions[char === 'S' && charIndex > 0 ? 'S_2' : char] || []).map((pos, dotIndex) => {
+                            const randomX = React.useMemo(() => (Math.random() - 0.5) * 2000, []);
+                            const randomY = React.useMemo(() => (Math.random() - 0.5) * 1000, []);
+                            
+                            const x = useTransform(progress, [0, 1], [pos.x * 4, randomX]);
+                            const y = useTransform(progress, [0, 1], [pos.y * 4, randomY]);
+                            const opacity = useTransform(progress, [0, 0.8, 1], [1, 0.5, 0]);
+
+                            return (
+                                <motion.div
+                                    key={dotIndex}
+                                    className="absolute w-2 h-2 bg-primary rounded-full"
+                                    style={{ 
+                                        left: pos.x * 20, 
+                                        top: pos.y * 20,
+                                        x,
+                                        y,
+                                        opacity
+                                    }}
+                                />
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+
 const BGChaos = () => (
     <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-10">
       <svg width="100%" height="100%">
@@ -43,31 +92,40 @@ const BGChaos = () => (
     </div>
   );
 
-const ChaosVisual = () => (
-  <VisualPlaceholder>
-    <BGChaos />
-    <div className="grid h-full w-full grid-cols-20 grid-rows-20">
-      {Array.from({ length: 400 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="h-1 w-1 rounded-full bg-muted/20"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{
-            scale: Math.random() * 1.2 + 0.1,
-            opacity: Math.random() * 0.4 + 0.1,
-          }}
-          transition={{
-            duration: 0.8,
-            delay: Math.random() * 2,
-            repeat: Infinity,
-            repeatType: 'reverse',
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
-  </VisualPlaceholder>
-);
+const ChaosVisual = ({ scrollYProgress }: { scrollYProgress: MotionValue<number>}) => {
+    const chaosOpacity = useTransform(scrollYProgress, [0.15, 0.25], [0, 1]);
+    const logoProgress = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
+
+    return (
+        <VisualPlaceholder>
+            <BGChaos />
+            <StatSparkLogo progress={logoProgress} />
+            <motion.div 
+                style={{ opacity: chaosOpacity }}
+                className="grid h-full w-full grid-cols-20 grid-rows-20"
+            >
+                {Array.from({ length: 400 }).map((_, i) => (
+                    <motion.div
+                        key={i}
+                        className="h-1 w-1 rounded-full bg-muted/20"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{
+                            scale: Math.random() * 1.2 + 0.1,
+                            opacity: Math.random() * 0.4 + 0.1,
+                        }}
+                        transition={{
+                            duration: 0.8,
+                            delay: Math.random() * 2,
+                            repeat: Infinity,
+                            repeatType: 'reverse',
+                            ease: 'easeInOut',
+                        }}
+                    />
+                ))}
+            </motion.div>
+        </VisualPlaceholder>
+    );
+};
 
 const LinearAlgebraVisual = () => (
   <VisualPlaceholder>
@@ -210,11 +268,11 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number];
+  range: [number, number, number, number];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1]);
-  const scale = useTransform(scrollYProgress, range, [0.9, 1]);
+  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, range, [0.9, 1, 1, 0.9]);
   return <motion.div style={{ opacity, scale }} className="absolute inset-0">{children}</motion.div>;
 };
 
@@ -223,22 +281,22 @@ export default function VisualsContainer({
 }: {
   scrollYProgress: MotionValue<number>;
 }) {
-  const finalGridY = useTransform(scrollYProgress, [0.95, 1], ['100vh', '0vh']);
-  const finalGridOpacity = useTransform(scrollYProgress, [0.95, 1], [0, 1]);
+  const finalGridY = useTransform(scrollYProgress, [0.85, 1], ['100vh', '0vh']);
+  const finalGridOpacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
 
   return (
     <div className="sticky top-0 h-screen w-full overflow-hidden">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.2, 0.4]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.2, 0.25, 0.4, 0.45]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.6]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.45, 0.6, 0.65]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.8]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.65, 0.8, 0.85]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.8, 0.95]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.8, 0.85, 0.9, 0.95]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress}>
@@ -257,10 +315,10 @@ const ModuleGridVisual = ({
   scrollYProgress: MotionValue<number>;
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0.95, 1], [0, 1]);
+  const opacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
-      <ChaosVisual />
+      <ChaosVisual scrollYProgress={scrollYProgress} />
       {children}
     </motion.div>
   );
@@ -272,11 +330,11 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
+  const opacity = useTransform(scrollYProgress, [0.2, 0.25], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.25], [1, 0.9]);
   return (
     <motion.div style={{ opacity, scale }} className="absolute inset-0">
-      <ChaosVisual />
+      <ChaosVisual scrollYProgress={scrollYProgress} />
     </motion.div>
   );
 };

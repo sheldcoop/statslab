@@ -41,60 +41,28 @@ export default function TextOverlay({
     <div className="pointer-events-none absolute inset-0">
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0, 0.05, 0.2, 0.25]}
+        range={[0.15, 0.2, 0.4, 0.45]}
         title="Data is Chaos"
         subtitle="It’s a universe of disconnected points, a symphony without a conductor. Our journey begins by facing this raw, untamed wilderness."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.2, 0.25, 0.4, 0.45]}
+        range={[0.4, 0.45, 0.6, 0.65]}
         title="Linear Algebra Gives It Structure"
         subtitle="We introduce vectors and matrices—the language of space and transformation. The chaos begins to form shapes, to align along hidden axes."
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.4, 0.45, 0.6, 0.65]}
+        range={[0.6, 0.65, 0.8, 0.85]}
         title="Statistics Finds the Pattern"
         subtitle="Probability and distributions reveal the invisible trends. We learn to listen for the signal within the noise, quantifying uncertainty."
       />
-      <TextSection
+       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.6, 0.65, 0.8, 0.85]}
-        title="Time Series Makes It Predict"
-        subtitle="The past gains a voice. We analyze sequences, understand rhythms, and begin to forecast the future with confidence."
-      />
-      <TextSection
-        scrollYProgress={scrollYProgress}
-        range={[0.8, 0.85, 0.95, 1.0]}
+        range={[0.8, 0.85, 0.9, 0.95]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
     </div>
   );
 }
-
-const FirstTextSection = ({
-  scrollYProgress,
-}: {
-  scrollYProgress: MotionValue<number>;
-}) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.15, 0.25], [0, 0, -100]);
-
-  return (
-    <section className="flex h-screen items-center justify-center">
-      <motion.div
-        style={{ opacity, y }}
-        className="mx-auto max-w-2xl text-center"
-      >
-        <h2 className="font-headline text-5xl font-bold md:text-7xl">
-          Data is Chaos
-        </h2>
-        <p className="mt-4 font-body text-xl text-muted-foreground">
-          It’s a universe of disconnected points, a symphony without a
-          conductor. Our journey begins by facing this raw, untamed wilderness.
-        </p>
-      </motion.div>
-    </section>
-  );
-};
