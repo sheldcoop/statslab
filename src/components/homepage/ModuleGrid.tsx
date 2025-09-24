@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import React from 'react';
+import Link from 'next/link';
 
 // --- Thematic Background Components ---
 
@@ -207,36 +208,42 @@ const gridItems = [
     title: 'Linear Algebra',
     description: 'Vectors, matrices, and tensors. The language of data.',
     background: <BGLinearAlgebra />,
+    href: '/modules/linear-algebra',
   },
   {
     icon: Sigma,
     title: 'Statistics & Probability',
     description: 'Quantifying uncertainty and making sense of distributions.',
     background: <BGStatistics />,
+    href: '/modules/statistics',
   },
   {
     icon: Code,
     title: 'Python for Quants',
     description: 'NumPy, Pandas, SciPy. The tools of the trade.',
     background: <BGPython />,
+    href: '/modules/python',
   },
   {
     icon: TrendingUp,
     title: 'Time Series Analysis',
     description: 'ARIMA, GARCH, and forecasting market movements.',
     background: <BGTimeSeries />,
+    href: '/modules/time-series',
   },
   {
     icon: Cpu,
     title: 'Machine Learning',
     description: 'Building predictive models for financial markets.',
     background: <BGMachineLearning />,
+    href: '/modules/machine-learning',
   },
   {
     icon: Calculator,
     title: 'Algorithmic Trading',
     description: 'From strategy backtesting to live deployment.',
     background: <BGAlgorithmicTrading />,
+    href: '/modules/algorithmic-trading',
   },
 ];
 
@@ -306,30 +313,31 @@ export default function ModuleGrid() {
           {gridItems.map((item, index) => {
             const Icon = item.icon;
             return (
-              <motion.div
-                key={index}
-                variants={gridItemVariants}
-                whileHover={{
-                  scale: 1.03,
-                  borderColor: 'hsl(var(--secondary))',
-                  boxShadow: '0 0 25px hsl(var(--secondary) / 0.2)',
-                  transition: { duration: 0.2, ease: 'easeOut' },
-                }}
-                className="relative cursor-pointer overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left"
-              >
-                {item.background}
-                <div className="relative z-10">
-                  <div className="mb-4">
-                    <Icon className="h-8 w-8 text-secondary" />
+              <Link href={item.href} key={index} className="block h-full">
+                <motion.div
+                  variants={gridItemVariants}
+                  whileHover={{
+                    scale: 1.03,
+                    borderColor: 'hsl(var(--secondary))',
+                    boxShadow: '0 0 25px hsl(var(--secondary) / 0.2)',
+                    transition: { duration: 0.2, ease: 'easeOut' },
+                  }}
+                  className="relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left"
+                >
+                  {item.background}
+                  <div className="relative z-10">
+                    <div className="mb-4">
+                      <Icon className="h-8 w-8 text-secondary" />
+                    </div>
+                    <h3 className="font-headline text-2xl font-bold">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {item.description}
+                    </p>
                   </div>
-                  <h3 className="font-headline text-2xl font-bold">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-              </motion.div>
+                </motion.div>
+              </Link>
             );
           })}
         </motion.div>
