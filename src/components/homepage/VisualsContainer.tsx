@@ -16,8 +16,36 @@ const VisualPlaceholder = ({
   </div>
 );
 
+const BGChaos = () => (
+    <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-10">
+      <svg width="100%" height="100%">
+        <defs>
+          <pattern
+            id="chaos-grid"
+            width="40"
+            height="40"
+            patternUnits="userSpaceOnUse"
+            patternTransform="translate(-1, -1)"
+          >
+            <motion.path
+              d="M 40 0 L 0 0 0 40"
+              fill="none"
+              stroke="hsl(var(--border))"
+              strokeWidth="0.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#chaos-grid)" />
+      </svg>
+    </div>
+  );
+
 const ChaosVisual = () => (
   <VisualPlaceholder>
+    <BGChaos />
     <div className="grid h-full w-full grid-cols-20 grid-rows-20">
       {Array.from({ length: 400 }).map((_, i) => (
         <motion.div
@@ -40,6 +68,7 @@ const ChaosVisual = () => (
     </div>
   </VisualPlaceholder>
 );
+
 const LinearAlgebraVisual = () => (
   <VisualPlaceholder>
     <svg
@@ -181,11 +210,12 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: [number, number, number, number];
+  range: [number, number];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
-  return <motion.div style={{ opacity }} className="absolute inset-0">{children}</motion.div>;
+  const opacity = useTransform(scrollYProgress, range, [0, 1]);
+  const scale = useTransform(scrollYProgress, range, [0.9, 1]);
+  return <motion.div style={{ opacity, scale }} className="absolute inset-0">{children}</motion.div>;
 };
 
 export default function VisualsContainer({
@@ -193,22 +223,22 @@ export default function VisualsContainer({
 }: {
   scrollYProgress: MotionValue<number>;
 }) {
-  const finalGridY = useTransform(scrollYProgress, [1.15, 1.25], [50, 0]);
-  const finalGridOpacity = useTransform(scrollYProgress, [1.15, 1.25], [0, 1]);
+  const finalGridY = useTransform(scrollYProgress, [0.85, 1], ['100vh', '0vh']);
+  const finalGridOpacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
 
   return (
     <div className="sticky top-0 h-screen w-full overflow-hidden">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.4, 0.5]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.5, 0.65, 0.75]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.3, 0.4]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.65, 0.75, 0.9, 1.0]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.45, 0.55]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.9, 1.0, 1.15, 1.25]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.6, 0.7]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress}>
@@ -227,7 +257,7 @@ const ModuleGridVisual = ({
   scrollYProgress: MotionValue<number>;
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [1.15, 1.25], [0, 1]);
+  const opacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
       <ChaosVisual />
@@ -242,9 +272,10 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.15], [1, 0.9]);
   return (
-    <motion.div style={{ opacity }} className="absolute inset-0">
+    <motion.div style={{ opacity, scale }} className="absolute inset-0">
       <ChaosVisual />
     </motion.div>
   );
