@@ -13,19 +13,33 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import LinearAlgebraVisual from '@/components/homepage/LinearAlgebraVisual';
 
 const GridPanel = ({
   className,
   children,
+  onHoverStart,
+  onHoverEnd,
 }: {
   className?: string;
   children: React.ReactNode;
+  onHoverStart?: () => void;
+  onHoverEnd?: () => void;
 }) => (
-  <Card
-    className={`flex flex-col justify-between overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 hover:shadow-2xl hover:shadow-primary/10 ${className}`}
+  <motion.div
+    onHoverStart={onHoverStart}
+    onHoverEnd={onHoverEnd}
+    variants={gridItemVariants}
+    whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+    className="relative"
   >
-    {children}
-  </Card>
+    <Card
+      className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 hover:shadow-2xl hover:shadow-primary/10 ${className}`}
+    >
+      {children}
+    </Card>
+  </motion.div>
 );
 
 const gridContainerVariants = {
@@ -51,6 +65,8 @@ const gridItemVariants = {
 };
 
 export default function Home() {
+  const [isLinearAlgebraHovered, setIsLinearAlgebraHovered] = useState(false);
+
   return (
     <main className="min-h-screen w-full bg-background font-mono text-foreground">
       <div className="container mx-auto p-4 md:p-8">
@@ -72,12 +88,25 @@ export default function Home() {
           initial="hidden"
           animate="show"
         >
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          >
-            <GridPanel>
+          <div className="md:col-span-1 lg:col-span-2">
+            <GridPanel
+              onHoverStart={() => setIsLinearAlgebraHovered(true)}
+              onHoverEnd={() => setIsLinearAlgebraHovered(false)}
+            >
+              <div className="absolute inset-0 z-0">
+                <AnimatePresence>
+                  {isLinearAlgebraHovered && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.5 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <LinearAlgebraVisual />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <CardHeader className="z-10">
                 <CardTitle className="flex items-center gap-2">
                   <Pyramid className="text-primary" />
@@ -90,13 +119,9 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          >
+          <div className="md:col-span-1 lg:col-span-2">
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -110,13 +135,9 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          >
+          <div className="md:col-span-1 lg:col-span-2">
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -130,13 +151,9 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          >
+          <div className="md:col-span-1 lg:col-span-2">
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -150,13 +167,9 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </motion.div>
-          
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          >
+          </div>
+
+          <div className="md:col-span-1 lg:col-span-2">
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -170,13 +183,9 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          >
+          <div className="md:col-span-1 lg:col-span-2">
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -190,7 +199,7 @@ export default function Home() {
                 </p>
               </CardContent>
             </GridPanel>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
       <footer className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/80 p-2 text-center text-xs text-muted-foreground backdrop-blur-sm">
@@ -199,3 +208,19 @@ export default function Home() {
     </main>
   );
 }
+
+const AnimatePresence = ({
+  children,
+  initial = true,
+}: {
+  children: React.ReactNode;
+  initial?: boolean;
+}) => {
+  const [present, setPresent] = useState(true);
+
+  return (
+    <>
+      {present && children}
+    </>
+  )
+};
