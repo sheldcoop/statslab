@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   BarChart,
   Bar,
@@ -9,10 +9,8 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell,
   LineChart,
   Line,
-  ReferenceLine,
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -25,35 +23,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { randomLogNormal, randomBates, randomNormal } from 'd3-random';
-import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { ArrowRight } from 'lucide-react';
+import { generateDistribution } from '@/ai/flows/statistics-flow';
+import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
 // --- Type Definitions ---
-type Scene = 'SCENE_1_CHAOS' | 'SCENE_2_FIRST_SPOONFUL' | 'SCENE_3_MAGIC_TRICK' | 'SCENE_4_LAB';
+type DistributionType = 'normal' | 'uniform' | 'beta' | 'bimodal' | 'positive-skew' | 'negative-skew';
 
-// --- Data Generation ---
-const generateData = (type: string, n: number): number[] => {
-  switch (type) {
-    case 'positive-skew':
-      return Array.from({ length: n }, randomLogNormal(0, 1));
-    case 'negative-skew':
-      const negSkewGenerator = randomBates(4);
-      return Array.from({ length: n }, () => 10 - negSkewGenerator() * 10);
-    case 'bimodal':
-      const bimodal = () => (Math.random() < 0.5 ? randomNormal(2, 1)() : randomNormal(8, 1)());
-      return Array.from({ length: n }, bimodal);
-    case 'uniform':
-      return Array.from({ length: n }, () => Math.random() * 10);
-    default: // 'normal'
-      return Array.from({ length: n }, randomNormal(5, 1.5));
-  }
-};
-
-const binData = (data: number[], numBins: number): { name: string; value: number; x0: number; x1: number }[] => {
+// --- Data Utilities ---
+const binData = (
+  data: number[],
+  numBins: number
+): { name: string; value: number; x0: number; x1: number }[] => {
   if (data.length === 0) return [];
-  
+
   let min = Math.min(...data);
   let max = Math.max(...data);
 
@@ -76,244 +60,309 @@ const binData = (data: number[], numBins: number): { name: string; value: number
 
   for (const d of data) {
     let binIndex = Math.floor((d - min) / binSize);
-    if (binIndex >= numBins) binIndex = numBins - 1; // Ensure it stays in bounds
-    if(bins[binIndex]) {
-       bins[binIndex].value++;
-   }
+    if (binIndex >= numBins) binIndex = numBins - 1;
+    if (bins[binIndex]) {
+      bins[binIndex].value++;
+    }
   }
   return bins;
 };
 
+const calculateMean = (data: number[]) => data.length > 0 ? data.reduce((a, b) => a + b, 0) / data.length : 0;
+
+const calculateStdDev = (data: number[], mean: number) => {
+    if (data.length < 2) return 0;
+    const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / (data.length - 1);
+    return Math.sqrt(variance);
+}
+
 // --- Main Component ---
 export default function CltDiscoveryLab() {
   // --- State Management ---
-  const [scene, setScene] = useState<Scene>('SCENE_1_CHAOS');
-  const [populationType, setPopulationType] = useState('positive-skew');
-  const [populationData, setPopulationData] = useState<number[]>(() => generateData('positive-skew', 10000));
+  const [distributionType, setDistributionType] = useState<DistributionType>('positive-skew');
+  const [populationData, setPopulationData] = useState<number[]>([]);
+  const [isLoadingPopulation, setIsLoadingPopulation] = useState(true);
+
   const [sampleMeans, setSampleMeans] = useState<number[]>([]);
+  const [currentAnimatedSample, setCurrentAnimatedSample] = useState<number[]>([]);
+  
   const [sampleSize, setSampleSize] = useState(30);
   const [numSamples, setNumSamples] = useState(5000);
+  const [simulationSpeed, setSimulationSpeed] = useState(50); // ms per sample
+
   const [isSimulating, setIsSimulating] = useState(false);
-  const [showTheoretical, setShowTheoretical] = useState(false);
   
-  // --- Memoized Calculations ---
-  const populationBinned = useMemo(() => binData(populationData, 40), [populationData]);
-  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
-  
-  const populationMean = useMemo(() => populationData.reduce((a, b) => a + b, 0) / populationData.length, [populationData]);
-  const populationStdDev = useMemo(() => {
-    const mean = populationMean;
-    const variance = populationData.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / populationData.length;
-    return Math.sqrt(variance);
-  }, [populationData, populationMean]);
+  const simulationRef = useRef<NodeJS.Timeout>();
 
-  const theoreticalMean = populationMean;
-  const theoreticalStdDev = populationStdDev / Math.sqrt(sampleSize);
-
-  const normalPDF = (x: number, mean: number, stdDev: number) => {
-    if (stdDev <= 0) return 0;
-    return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
-  };
-
-  const theoreticalCurveData = useMemo(() => {
-    if (!showTheoretical || sampleMeansBinned.length === 0 || theoreticalStdDev <= 0) return [];
-    const binInfo = sampleMeansBinned[0];
-    if (!binInfo || binInfo.x1 - binInfo.x0 <= 0) return [];
-    
-    const binSize = binInfo.x1 - binInfo.x0;
-    const scale = sampleMeans.length * binSize;
-      
-    return sampleMeansBinned.map(bin => ({
-      x: bin.x0 + binSize / 2,
-      y: normalPDF(bin.x0 + binSize / 2, theoreticalMean, theoreticalStdDev) * scale
-    }));
-  }, [sampleMeansBinned, theoreticalMean, theoreticalStdDev, sampleMeans.length, showTheoretical]);
+  const [meanParam, setMeanParam] = useState(5);
+  const [stdDevParam, setStdDevParam] = useState(2);
+  const [alphaParam, setAlphaParam] = useState(2);
+  const [betaParam, setBetaParam] = useState(5);
 
 
-  // --- Event Handlers ---
-  const handlePopulationChange = useCallback((value: string) => {
-    setPopulationType(value);
-    setPopulationData(generateData(value, 10000));
+  // --- Data Fetching & Generation ---
+  const fetchPopulationData = useCallback(async () => {
+    setIsLoadingPopulation(true);
     setSampleMeans([]);
-    setShowTheoretical(false);
-    if (scene === 'SCENE_4_LAB') {
-      runSimulation();
+    setCurrentAnimatedSample([]);
+    try {
+      const { data } = await generateDistribution({
+        distribution: distributionType,
+        count: 10000,
+        mean: meanParam,
+        stdDev: stdDevParam,
+        alpha: alphaParam,
+        beta: betaParam,
+      });
+      setPopulationData(data);
+    } catch (error) {
+      console.error("Failed to fetch population data:", error);
+    } finally {
+      setIsLoadingPopulation(false);
     }
-  }, [scene]);
+  }, [distributionType, meanParam, stdDevParam, alphaParam, betaParam]);
 
-  const handleTakeOneSample = () => {
-    const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
-    const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
-    setSampleMeans([mean]);
-    setScene('SCENE_2_FIRST_SPOONFUL');
-  };
-  
+  useEffect(() => {
+    fetchPopulationData();
+  }, [fetchPopulationData]);
+
+
+  // --- Simulation Logic ---
   const runSimulation = useCallback(() => {
     setIsSimulating(true);
-    setSampleMeans([]);
-  
-    let means: number[] = [];
-    let i = 0;
-    const step = () => {
-      if (i >= numSamples) {
-        setIsSimulating(false);
-        if (scene !== 'SCENE_4_LAB') {
-            setScene('SCENE_3_MAGIC_TRICK');
-        }
-        return;
-      }
-      
-      const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
-      const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
-      means.push(mean);
-  
-      // Batch updates for performance
-      if (i % 50 === 0 || i === numSamples - 1) {
-        setSampleMeans([...means]);
-      }
-      
-      i++;
-      setTimeout(step, 0);
-    };
-  
-    step();
-  }, [numSamples, sampleSize, populationData, scene]);
 
+    const simulationStep = () => {
+        if (populationData.length === 0) {
+            setIsSimulating(false);
+            return;
+        }
+
+        const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
+        const mean = calculateMean(sample);
+        
+        setCurrentAnimatedSample(sample);
+        
+        // This functional update is crucial for performance and correctness
+        setSampleMeans(prevMeans => {
+            const newMeans = [...prevMeans, mean];
+            if (newMeans.length >= numSamples) {
+                stopSimulation();
+                return newMeans.slice(0, numSamples);
+            }
+            return newMeans;
+        });
+    };
+
+    simulationRef.current = setInterval(simulationStep, simulationSpeed);
+  }, [populationData, sampleSize, numSamples, simulationSpeed]);
+
+  const stopSimulation = () => {
+      setIsSimulating(false);
+      if(simulationRef.current) {
+        clearInterval(simulationRef.current);
+      }
+  }
+  
+  const handleSimulateClick = () => {
+    if (isSimulating) {
+        stopSimulation();
+    } else {
+        if (sampleMeans.length >= numSamples) {
+            setSampleMeans([]);
+            setCurrentAnimatedSample([]);
+        }
+        runSimulation();
+    }
+  }
+
+  const handleResetClick = () => {
+    stopSimulation();
+    setSampleMeans([]);
+    setCurrentAnimatedSample([]);
+    fetchPopulationData();
+  }
+
+  useEffect(() => {
+      return () => stopSimulation(); // Cleanup on unmount
+  }, []);
+
+  // --- Memoized Calculations for Charts ---
+  const populationMean = useMemo(() => calculateMean(populationData), [populationData]);
+  const populationStdDev = useMemo(() => calculateStdDev(populationData, populationMean), [populationData, populationMean]);
+
+  const populationBinned = useMemo(() => binData(populationData, 40), [populationData]);
+  const currentSampleBinned = useMemo(() => binData(currentAnimatedSample, 20), [currentAnimatedSample]);
+  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
+  
+  const sampleMeansMean = useMemo(() => calculateMean(sampleMeans), [sampleMeans]);
+  const sampleMeansStdDev = useMemo(() => calculateStdDev(sampleMeans, sampleMeansMean), [sampleMeans, sampleMeansMean]);
 
   // --- UI Components ---
-  const Scene1Content = () => (
-    <div className="text-center">
-        <h2 className="font-headline text-2xl md:text-3xl text-muted-foreground">If we take an average from this weird data, what will it look like?</h2>
-        <Button size="lg" className="mt-8 font-headline text-lg" onClick={handleTakeOneSample}>
-            Take One Sample <ArrowRight className="ml-2"/>
-        </Button>
-    </div>
-  );
-
-  const Scene2Content = () => (
-    <div className="text-center">
-        <p className="font-headline text-2xl md:text-3xl text-muted-foreground">Okay, that's one average. Not very useful.</p>
-        <p className="font-headline text-2xl md:text-3xl text-muted-foreground mt-2">What if we did this 5,000 times?</p>
-        <Button size="lg" className="mt-8 font-headline text-lg" onClick={runSimulation}>
-            {isSimulating ? 'Simulating...' : 'Run the Simulation'}
-        </Button>
-    </div>
-  );
-
-  const Scene3Content = () => (
-    <motion.div initial={{opacity: 0}} animate={{opacity: 1}} transition={{delay: 1.5, duration: 1}} className="text-center">
-        <h2 className="font-headline text-3xl md:text-5xl text-primary">From chaos comes order.</h2>
-        <p className="font-headline text-2xl md:text-3xl text-muted-foreground mt-2">This is the Central Limit Theorem.</p>
-        <Button size="lg" className="mt-8 font-headline text-lg" onClick={() => setScene('SC_ENE_4_LAB')}>
-            Enter the Lab <ArrowRight className="ml-2"/>
-        </Button>
-    </motion.div>
-  );
-
-  const LabControls = () => (
-     <motion.div initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration: 0.5}} className="space-y-6">
+  const renderControls = () => (
+    <div className="space-y-4">
         <div>
-            <Label>Population Shape</Label>
-            <Select value={populationType} onValueChange={handlePopulationChange} disabled={isSimulating}>
+            <Label className="font-semibold">1. Population Shape</Label>
+            <Select value={distributionType} onValueChange={(v) => setDistributionType(v as DistributionType)} disabled={isSimulating}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="positive-skew">Positively Skewed</SelectItem>
-                    <SelectItem value="negative-skew">Negatively Skewed</SelectItem>
-                    <SelectItem value="bimodal">Bimodal</SelectItem>
-                    <SelectItem value="uniform">Uniform</SelectItem>
                     <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="uniform">Uniform</SelectItem>
+                    <SelectItem value="beta">Beta</SelectItem>
+                    <SelectItem value="bimodal">Bimodal</SelectItem>
+                    <SelectItem value="positive-skew">Positive Skew</SelectItem>
+                    <SelectItem value="negative-skew">Negative Skew</SelectItem>
                 </SelectContent>
             </Select>
         </div>
-        <div>
-            <Label>Sample Size: {sampleSize}</Label>
-            <Slider disabled={isSimulating} value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} onValueCommit={runSimulation} min={2} max={200} step={1} />
+        {distributionType === 'normal' || distributionType === 'uniform' || distributionType === 'bimodal' || distributionType === 'positive-skew' || distributionType === 'negative-skew' ? (
+            <>
+             <div>
+                <Label>Mean: {meanParam.toFixed(2)}</Label>
+                <Slider disabled={isSimulating} value={[meanParam]} onValueChange={([v]) => setMeanParam(v)} min={-5} max={15} step={0.5} />
+            </div>
+             <div>
+                <Label>Std. Dev: {stdDevParam.toFixed(2)}</Label>
+                <Slider disabled={isSimulating} value={[stdDevParam]} onValueChange={([v]) => setStdDevParam(v)} min={0.5} max={5} step={0.1} />
+            </div>
+            </>
+        ) : null}
+        {distributionType === 'beta' ? (
+             <>
+             <div>
+                <Label>Alpha: {alphaParam.toFixed(2)}</Label>
+                <Slider disabled={isSimulating} value={[alphaParam]} onValueChange={([v]) => setAlphaParam(v)} min={0.1} max={10} step={0.1} />
+            </div>
+             <div>
+                <Label>Beta: {betaParam.toFixed(2)}</Label>
+                <Slider disabled={isSimulating} value={[betaParam]} onValueChange={([v]) => setBetaParam(v)} min={0.1} max={10} step={0.1} />
+            </div>
+            </>
+        ) : null}
+
+        <div className="border-t pt-4 space-y-4">
+            <Label className="font-semibold">2. Sampling Parameters</Label>
+             <div>
+                <Label>Sample Size: {sampleSize}</Label>
+                <Slider disabled={isSimulating} value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} />
+            </div>
+             <div>
+                <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
+                <Slider disabled={isSimulating} value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={10000} step={100} />
+            </div>
         </div>
-         <div className="flex items-center space-x-2 pt-4">
-           <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
-           <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
+        <div className="border-t pt-4 flex gap-2">
+            <Button onClick={handleSimulateClick} className="w-full" variant={isSimulating ? 'destructive' : 'default'}>
+                {isSimulating ? <Pause className="mr-2"/> : <Play className="mr-2"/>}
+                {isSimulating ? 'Pause' : 'Run'}
+            </Button>
+            <Button onClick={handleResetClick} variant="outline" aria-label="Reset Simulation">
+                <RotateCcw />
+            </Button>
         </div>
-    </motion.div>
+    </div>
   );
+
+ const StatDisplay = ({ title, value, isLoading }: { title: string; value: number; isLoading?: boolean }) => (
+    <div className="text-sm">
+        <span className="text-muted-foreground">{title}: </span>
+        {isLoading ? <Skeleton className="h-4 w-12 inline-block" /> : <span className="font-bold">{value.toFixed(2)}</span>}
+    </div>
+ );
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
+      <header className="text-center">
+        <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
+            The Central Limit Theorem
+        </h1>
+        <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
+            Discover the magic bridge between chaos and predictability. No matter how strange the source data, the averages of its samples will always tend to form a perfect bell curve.
+        </p>
+      </header>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* --- Left Panel --- */}
-        <Card className="lg:col-span-1">
+        {/* --- Left Panel: Controls --- */}
+        <Card className="lg:col-span-1 h-fit sticky top-24">
           <CardHeader>
-            <CardTitle>The Population</CardTitle>
-            <CardDescription>The messy, unpredictable dataset we start with.</CardDescription>
+            <CardTitle>Discovery Lab</CardTitle>
+            <CardDescription>Adjust the parameters of the experiment.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={populationBinned} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} interval="auto"/>
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={[0, 'dataMax']} />
-                <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-            {scene === 'SCENE_4_LAB' && <LabControls />}
+            {renderControls()}
           </CardContent>
         </Card>
 
-        {/* --- Right Panel --- */}
+        {/* --- Right Panel: Visualizations --- */}
         <div className="space-y-8 lg:col-span-2">
-          <Card className="flex min-h-[400px] flex-col items-center justify-center">
-            <CardContent className="pt-6 w-full">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={scene}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full"
-                >
-                  {scene === 'SCENE_1_CHAOS' && <Scene1Content />}
-                  {scene === 'SCENE_2_FIRST_SPOONFUL' && <Scene2Content />}
-                  {scene === 'SCENE_3_MAGIC_TRICK' && <Scene3Content />}
-                  {scene === 'SCENE_4_LAB' && <Scene3Content />}
+            <Card>
+                <CardHeader>
+                    <CardTitle>1. The Population</CardTitle>
+                    <CardDescription>The entire dataset we are drawing samples from.</CardDescription>
+                    <div className="flex gap-4 pt-2">
+                        <StatDisplay title="Mean" value={populationMean} isLoading={isLoadingPopulation} />
+                        <StatDisplay title="Std. Dev" value={populationStdDev} isLoading={isLoadingPopulation} />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={250}>
+                        {isLoadingPopulation ? <Skeleton className="h-full w-full"/> : (
+                        <BarChart data={populationBinned} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} interval="auto"/>
+                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={[0, 'dataMax']} />
+                            <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]} animationDuration={300} />
+                        </BarChart>
+                        )}
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+             <AnimatePresence>
+             {isSimulating && currentAnimatedSample.length > 0 && (
+                <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: 20}}>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>2. A Single Sample</CardTitle>
+                             <CardDescription>
+                                Taking a random sample of {sampleSize} data points and calculating its average. 
+                                <span className="font-bold ml-2">Sample Mean: {calculateMean(currentAnimatedSample).toFixed(2)}</span>
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ResponsiveContainer width="100%" height={150}>
+                                 <BarChart data={currentSampleBinned}>
+                                     <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval="auto"/>
+                                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} domain={[0, 'dataMax']} />
+                                     <Bar dataKey="value" fill="hsl(var(--accent))" radius={[2, 2, 0, 0]} />
+                                 </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
                 </motion.div>
-              </AnimatePresence>
-            </CardContent>
-          </Card>
-          
-          <AnimatePresence>
-          {scene !== 'SCENE_1_CHAOS' && (
-            <motion.div initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration: 1}}>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Distribution of Sample Averages</CardTitle>
-                        <CardDescription>
-                            {isSimulating ? "Watching the pattern emerge..." : "The final result of our experiment."}
-                            <span className="font-bold text-primary ml-4">Samples: {sampleMeans.length.toLocaleString()}</span>
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={sampleMeansBinned} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <XAxis dataKey="name" type="number" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
-                                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={[0, 'dataMax']}/>
-                                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} />
-                                {showTheoretical && theoreticalCurveData.length > 0 && (
-                                    <Line
-                                        data={theoreticalCurveData}
-                                        type="monotone"
-                                        dataKey="y"
-                                        stroke="hsl(var(--accent))"
-                                        strokeWidth={2}
-                                        dot={false}
-                                        animationDuration={300}
-                                    />
-                                )}
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-          )}
-          </AnimatePresence>
+             )}
+             </AnimatePresence>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>3. The Distribution of Sample Averages</CardTitle>
+                    <CardDescription>
+                        We plot the average of each sample. Watch the pattern emerge.
+                    </CardDescription>
+                     <div className="flex gap-4 pt-2">
+                        <StatDisplay title="Samples" value={sampleMeans.length} />
+                        <StatDisplay title="Mean" value={sampleMeansMean} />
+                        <StatDisplay title="Std. Dev" value={sampleMeansStdDev} />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                         <BarChart data={sampleMeansBinned} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                             <XAxis dataKey="name" type="number" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
+                             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={[0, 'dataMax']}/>
+                             <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} animationDuration={isSimulating ? 0 : 300}/>
+                         </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
         </div>
       </div>
     </div>
