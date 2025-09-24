@@ -79,31 +79,54 @@ const footerVariants = {
     }
 }
 
+const backgroundContainerVariants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.5,
+    },
+  },
+};
+
+const backgroundItemVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1 },
+};
+
 const CardBackground = () => (
-  <div className="absolute inset-0 z-0 overflow-hidden rounded-lg">
-    {Array.from({ length: 3 }).map((_, i) => (
+  <motion.div 
+    className="absolute inset-0 z-0 overflow-hidden rounded-lg"
+    variants={backgroundContainerVariants}
+    initial="hidden"
+    animate="show"
+  >
+    {Array.from({ length: 5 }).map((_, i) => (
       <motion.div
         key={i}
-        className="absolute h-40 w-40 rounded-full bg-secondary/5 opacity-50"
+        variants={backgroundItemVariants}
+        className="absolute h-40 w-40 rounded-full bg-secondary/10"
         initial={{
           x: `${Math.random() * 100}%`,
           y: `${Math.random() * 100}%`,
+          scale: 1,
+          opacity: 0
         }}
         animate={{
           x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
           y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
           scale: [1, 1.2, 1],
-          opacity: [0.1, 0.3, 0.1],
+          opacity: [0, 0.5, 0],
         }}
         transition={{
-          duration: Math.random() * 10 + 10,
+          duration: Math.random() * 5 + 5, // Faster duration
           repeat: Infinity,
-          repeatType: 'reverse',
+          repeatType: 'loop',
           ease: 'easeInOut',
+          delay: i * 1, // Staggered delay
         }}
       />
     ))}
-  </div>
+  </motion.div>
 );
 
 
