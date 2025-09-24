@@ -26,16 +26,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { Loader2 } from 'lucide-react';
+import { randomLogNormal, randomNormal } from 'd3-random';
 
-const SIMULATION_SPEED_MS = 20; // How fast to run the simulation loop
-const BATCH_SIZE = 10; // How many samples to process per animation frame
 
-type Scene = 'intro' | 'single_sample' | 'simulation' | 'lab';
-
-// NOTE: This will be replaced by a real API call to a Python backend.
-// For now, we simulate the data generation on the client.
+// --- Data Generation ---
 const generatePopulationData = (distribution: string, count: number) => {
-    const { randomLogNormal, randomNormal } = require('d3-random');
     switch (distribution) {
       case 'positive-skew':
         return Array.from({ length: count }, randomLogNormal(0, 1.5));
@@ -86,7 +81,6 @@ const binData = (data: number[] | undefined, numBins: number) => {
 
 
 export default function CltDiscoveryLab() {
-  const [scene, setScene] = useState<Scene>('intro');
   const [populationShape, setPopulationShape] = useState('positive-skew');
   const [populationData, setPopulationData] = useState<number[]>([]);
   const [isPopulationLoading, setIsPopulationLoading] = useState(true);
@@ -96,26 +90,60 @@ export default function CltDiscoveryLab() {
   const [isSimulating, setIsSimulating] = useState(false);
 
   const [sampleMeans, setSampleMeans] = useState<number[]>([]);
-  const [currentSingleSample, setCurrentSingleSample] = useState<number[]>([]);
   const [showTheoretical, setShowTheoretical] = useState(false);
 
-  const fetchPopulation = useCallback(async () => {
+  const runSimulation = useCallback(() => {
+    if (isSimulating || populationData.length === 0) return;
+    setIsSimulating(true);
+    setSampleMeans([]);
+  
+    let means: number[] = [];
+    const totalBatches = 100; // Run simulation in 100 batches for smooth animation
+    const batchSize = Math.ceil(numSamples / totalBatches);
+    let currentBatch = 0;
+  
+    const simulationStep = () => {
+      if (currentBatch >= totalBatches) {
+        setIsSimulating(false);
+        return;
+      }
+  
+      const batchMeans = Array.from({ length: batchSize }, () => {
+        const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
+        return sample.reduce((a, b) => a + b, 0) / sampleSize;
+      });
+  
+      means = [...means, ...batchMeans];
+      setSampleMeans(means);
+  
+      currentBatch++;
+      requestAnimationFrame(simulationStep);
+    };
+  
+    requestAnimationFrame(simulationStep);
+  }, [sampleSize, numSamples, populationData, isSimulating]);
+
+  const fetchPopulationAndSimulate = useCallback(async () => {
     setIsPopulationLoading(true);
     setSampleMeans([]);
-    setCurrentSingleSample([]);
-    // This simulates fetching data from a backend.
     const data = generatePopulationData(populationShape, 10000);
     setPopulationData(data);
     setIsPopulationLoading(false);
   }, [populationShape]);
 
   useEffect(() => {
-    fetchPopulation();
-  }, [fetchPopulation]);
+    fetchPopulationAndSimulate();
+  }, [fetchPopulationAndSimulate]);
+
+  useEffect(() => {
+    if (!isPopulationLoading && populationData.length > 0) {
+        runSimulation();
+    }
+    // This effect should re-run when the core parameters change
+  }, [isPopulationLoading, populationData, sampleSize, numSamples, runSimulation]);
 
   const populationBinned = useMemo(() => binData(populationData, 40), [populationData]);
   const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
-  const currentSampleBinned = useMemo(() => binData(currentSingleSample, 20), [currentSingleSample]);
 
   const { populationMean, populationStdDev } = useMemo(() => {
     if (!populationData || populationData.length === 0) return { populationMean: 0, populationStdDev: 0 };
@@ -140,154 +168,61 @@ export default function CltDiscoveryLab() {
           y: normalPDF(bin.x0 + (bin.x1 - bin.x0)/2, theoreticalMean, theoreticalStdDev) * scale
       }));
   }, [sampleMeansBinned, theoreticalMean, theoreticalStdDev, sampleMeans.length]);
-
-  const takeOneSample = useCallback(() => {
-      if (populationData.length === 0) return;
-      const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
-      setCurrentSingleSample(sample);
-      const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
-      setSampleMeans(prev => [...prev, mean]);
-      setScene('single_sample');
-  }, [sampleSize, populationData]);
-
-  const runSimulation = useCallback(() => {
-    setIsSimulating(true);
-    if(scene === 'single_sample') {
-      // Don't clear the first sample mean
-      setCurrentSingleSample([]);
-    } else {
-      setSampleMeans([]);
-    }
-    setScene('simulation');
-
-    let i = sampleMeans.length;
-    const simulationLoop = () => {
-        if (i >= numSamples || populationData.length === 0) {
-            setIsSimulating(false);
-            setScene('lab'); // Move to lab scene after simulation
-            return;
-        }
-
-        const batchMeans = Array.from({ length: BATCH_SIZE }, () => {
-            const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
-            return sample.reduce((a, b) => a + b, 0) / sampleSize;
-        });
-
-        setSampleMeans(prevMeans => [...prevMeans, ...batchMeans]);
-        i += BATCH_SIZE;
-        setTimeout(simulationLoop, SIMULATION_SPEED_MS);
-    };
-    simulationLoop();
-  }, [numSamples, sampleSize, populationData, scene, sampleMeans.length]);
-
+  
   const handleReset = useCallback(() => {
-    setSampleMeans([]);
-    setCurrentSingleSample([]);
-    fetchPopulation();
-    setScene('intro');
-  }, [fetchPopulation]);
-
-  const handlePopulationShapeChange = (v: string) => {
-    setPopulationShape(v);
-    handleReset();
-  }
+    fetchPopulationAndSimulate();
+  }, [fetchPopulationAndSimulate]);
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
-       <AnimatePresence mode="wait">
-        <motion.div
-          key={scene}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          {scene === 'intro' && (
-            <h2 className="font-headline text-4xl md:text-5xl text-primary">If we take an average from this weird data, what will it look like?</h2>
-          )}
-          {(scene === 'single_sample') && (
-            <h2 className="font-headline text-4xl md:text-5xl text-primary">Okay, that's one average. Not very useful. What if we did this {numSamples.toLocaleString()} times?</h2>
-          )}
-          {scene === 'simulation' && (
-            <h2 className="font-headline text-4xl md:text-5xl text-primary">From chaos comes order. This is the Central Limit Theorem.</h2>
-          )}
-           {scene === 'lab' && (
-            <div>
-                 <h2 className="font-headline text-4xl md:text-5xl text-primary">The Discovery Lab</h2>
-                 <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">The magic works every time. Change the population, adjust the sample size, and see for yourself.</p>
-            </div>
-           )}
-        </motion.div>
-       </AnimatePresence>
+        <div className="text-center">
+             <h2 className="font-headline text-4xl md:text-5xl text-primary">The Discovery Lab</h2>
+             <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">From chaos comes order. Change the population, adjust the sample size, and see how the Central Limit Theorem works its magic every time.</p>
+        </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* === CONTROLS === */}
-        <motion.div initial={false} className="lg:col-span-1">
+        <div className="lg:col-span-1">
              <Card>
               <CardHeader>
                 <CardTitle>The Laboratory</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <AnimatePresence>
-                  {scene === 'intro' && (
-                     <motion.div key="intro-controls" initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
-                        <Button onClick={takeOneSample} className="w-full" disabled={isPopulationLoading || isSimulating}>
-                          {isPopulationLoading ? 'Preparing Population...' : 'Take One Sample'}
-                        </Button>
-                     </motion.div>
-                  )}
-                  {scene === 'single_sample' && (
-                      <motion.div key="single-sample-controls" initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-4">
-                           <Button onClick={runSimulation} className="w-full" disabled={isSimulating}>
-                              {isSimulating ? "Simulating..." : `Run Simulation (${numSamples.toLocaleString()} times)`}
-                          </Button>
-                           <Button onClick={handleReset} className="w-full" variant="outline">Reset</Button>
-                      </motion.div>
-                  )}
-                   {(scene === 'simulation' || scene === 'lab') && (
-                    <motion.div
-                        key="lab-controls"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { delay: 0.3 } }}
-                        className="space-y-6"
-                    >
-                        <div>
-                            <Label>Population Shape</Label>
-                            <Select value={populationShape} onValueChange={handlePopulationShapeChange} disabled={isSimulating}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="positive-skew">Skewed (Positive)</SelectItem>
-                                    <SelectItem value="negative-skew">Skewed (Negative)</SelectItem>
-                                    <SelectItem value="bimodal">Bimodal</SelectItem>
-                                    <SelectItem value="uniform">Uniform</SelectItem>
-                                    <SelectItem value="normal">Normal</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label>Sample Size: {sampleSize}</Label>
-                            <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} disabled={isSimulating}/>
-                        </div>
-                        <div>
-                            <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
-                            <Slider value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={20000} step={100} disabled={isSimulating} />
-                        </div>
-                        <Button onClick={runSimulation} disabled={isSimulating} className="w-full">
-                            {isSimulating ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Simulating...</>) : 'Run New Simulation'}
-                        </Button>
-                         <Button onClick={handleReset} className="w-full" variant="outline">Reset</Button>
+                <div className="space-y-6">
+                    <div>
+                        <Label>Population Shape</Label>
+                        <Select value={populationShape} onValueChange={setPopulationShape} disabled={isSimulating}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="positive-skew">Skewed (Positive)</SelectItem>
+                                <SelectItem value="negative-skew">Skewed (Negative)</SelectItem>
+                                <SelectItem value="bimodal">Bimodal</SelectItem>
+                                <SelectItem value="uniform">Uniform</SelectItem>
+                                <SelectItem value="normal">Normal</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Label>Sample Size: {sampleSize}</Label>
+                        <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} disabled={isSimulating}/>
+                    </div>
+                    <div>
+                        <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
+                        <Slider value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={20000} step={100} disabled={isSimulating} />
+                    </div>
+                    <Button onClick={runSimulation} disabled={isSimulating} className="w-full">
+                        {isSimulating ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Simulating...</>) : 'Run New Simulation'}
+                    </Button>
+                     <Button onClick={handleReset} className="w-full" variant="outline">Reset</Button>
 
-                        <div className="flex items-center space-x-2 pt-4">
-                        <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
-                        <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
-                        </div>
-                    </motion.div>
-                   )}
-                </AnimatePresence>
+                    <div className="flex items-center space-x-2 pt-4">
+                    <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
+                    <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
+                    </div>
+                </div>
               </CardContent>
             </Card>
-        </motion.div>
+        </div>
 
         {/* === VISUALIZATIONS === */}
         <div className="space-y-8 lg:col-span-2">
@@ -303,12 +238,7 @@ export default function CltDiscoveryLab() {
                     <BarChart data={populationBinned} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => v > 0 ? v : ''}/>
-                        <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]}>
-                            {populationBinned.map((entry, index) => {
-                                const isSampled = currentSingleSample.length > 0 && currentSampleBinned.some(sampleBin => entry.x0 < sampleBin.x1 && entry.x1 > sampleBin.x0 && sampleBin.value > 0);
-                                return <Cell key={`cell-${index}`} fill={isSampled ? 'hsl(var(--primary))' : 'hsl(var(--secondary))'} opacity={isSampled ? 1 : 0.6} />;
-                            })}
-                        </Bar>
+                        <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
               )}
@@ -331,7 +261,7 @@ export default function CltDiscoveryLab() {
                             borderRadius: 'var(--radius)',
                         }}
                     />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} maxBarSize={40} />
+                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} maxBarSize={40} animationDuration={300} />
 
                     {showTheoretical && theoreticalCurveData.length > 0 && (
                         <ReferenceLine 
