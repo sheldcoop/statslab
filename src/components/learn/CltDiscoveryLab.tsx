@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { randomBates, randomExponential, randomNormal } from 'd3-random';
+import { randomLognormal, randomBates, randomExponential, randomNormal } from 'd3-random';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 
@@ -32,7 +32,7 @@ import { Label } from '../ui/label';
 const generateData = (type: string, n: number) => {
   switch (type) {
     case 'skewed':
-      return Array.from({ length: n }, randomExponential(1));
+      return Array.from({ length: n }, randomLognormal(0, 1.5));
     case 'bimodal': {
       const bimodal = () => {
         const r = Math.random();
@@ -41,9 +41,9 @@ const generateData = (type: string, n: number) => {
       return Array.from({ length: n }, bimodal);
     }
     case 'uniform':
-      return Array.from({ length: n }, Math.random);
+      return Array.from({ length: n }, () => Math.random() * 10);
     default: // normal
-      return Array.from({ length: n }, randomNormal(5, 2));
+      return Array.from({ length: n }, randomNormal(5, 1.5));
   }
 };
 
@@ -211,7 +211,7 @@ export default function CltDiscoveryLab() {
                              <Select value={populationType} onValueChange={setPopulationType}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="skewed">Skewed Right</SelectItem>
+                                    <SelectItem value="skewed">Skewed</SelectItem>
                                     <SelectItem value="bimodal">Bimodal</SelectItem>
                                     <SelectItem value="uniform">Uniform</SelectItem>
                                     <SelectItem value="normal">Normal</SelectItem>
@@ -307,3 +307,5 @@ export default function CltDiscoveryLab() {
     </div>
   );
 }
+
+    
