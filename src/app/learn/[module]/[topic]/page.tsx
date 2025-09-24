@@ -17,12 +17,7 @@ export default function TopicPage({
 }: {
   params: { module: string; topic: string };
 }) {
-  // Although Next.js can pass a promise for params, we will treat it as a plain object
-  // as this is a client component and params are resolved by the time it renders.
-  // The warning suggests React.use(), but that's for handling promise-like props during render.
-  // Direct access is fine here and the warning is a heads-up for future Next.js versions.
-  // For simplicity and to fix the immediate issue if it were breaking, we ensure params is an object.
-  const params = paramsProp;
+  const params = React.use(paramsProp);
 
   const moduleTitle = formatSlug(params.module);
   const topicTitle = formatSlug(params.topic);
