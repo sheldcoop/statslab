@@ -11,7 +11,7 @@ import {
   randomGeometric,
   randomInt,
   randomIrwinHall,
-  randomLognormal,
+  randomLogNormal,
   randomNormal,
   randomPareto,
   randomPoisson,
@@ -175,9 +175,9 @@ const usePopulation = (
 
       switch (shape) {
         case 'positive-skew':
-          return Array.from({ length: count }, randomLognormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)))));
+          return Array.from({ length: count }, randomLogNormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)))));
         case 'negative-skew':
-          const logNormal = randomLognormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2))));
+          const logNormal = randomLogNormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2))));
           return Array.from({ length: count }, () => mean * 2 - logNormal());
         case 'bimodal': {
           const mean1 = mean - stdDev * 1.5;
@@ -193,7 +193,7 @@ const usePopulation = (
         case 'exponential':
             return Array.from({ length: count }, randomExponential(1 / mean));
         case 'lognormal':
-            return Array.from({ length: count }, randomLognormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)))));
+            return Array.from({ length: count }, randomLogNormal(Math.log(mean) - 0.5 * Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)), Math.sqrt(Math.log(1 + Math.pow(stdDev, 2) / Math.pow(mean, 2)))));
         case 'poisson':
             return Array.from({ length: count }, randomPoisson(mean));
         case 'normal':
