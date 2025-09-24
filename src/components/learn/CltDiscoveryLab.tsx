@@ -228,7 +228,7 @@ const useSimulation = (
 ) => {
     const [sampleMeans, setSampleMeans] = useState<number[]>([]);
     const [isSimulating, setIsSimulating] = useState(false);
-    const simulationRef = useRef<{ stop: boolean; id?: number }>({ stop: false });
+    const simulationRef = useRef<{ stop: boolean; timeoutId?: NodeJS.Timeout }>({ stop: false });
 
     const runSimulation = useCallback(() => {
         if (isSimulating || populationData.length === 0) return;
@@ -238,38 +238,35 @@ const useSimulation = (
         setIsSimulating(true);
     
         let means: number[] = [];
-        const totalBatches = animationSpeed;
-        const batchSize = 1;
-    
+        const delay = 500 / animationSpeed; // Higher speed = lower delay
+
         const simulationStep = () => {
           if (simulationRef.current.stop || means.length >= numSamples) {
             setIsSimulating(false);
-            simulationRef.current.id = undefined;
+            simulationRef.current.timeoutId = undefined;
             return;
           }
     
-          const batchMeans = Array.from({ length: batchSize }, () => {
-            const sample = Array.from(
-              { length: sampleSize },
-              () => populationData[Math.floor(Math.random() * populationData.length)]
-            );
-            return sample.reduce((a, b) => a + b, 0) / sampleSize;
-          });
-    
-          means = [...means, ...batchMeans];
+          const sample = Array.from(
+            { length: sampleSize },
+            () => populationData[Math.floor(Math.random() * populationData.length)]
+          );
+          const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
+
+          means = [...means, mean];
           setSampleMeans(means);
     
-          simulationRef.current.id = requestAnimationFrame(simulationStep);
+          simulationRef.current.timeoutId = setTimeout(simulationStep, delay);
         };
     
-        simulationRef.current.id = requestAnimationFrame(simulationStep);
+        simulationStep();
       }, [sampleSize, numSamples, populationData, isSimulating, animationSpeed]);
 
     const stopSimulation = useCallback(() => {
         simulationRef.current.stop = true;
-        if (simulationRef.current.id) {
-          cancelAnimationFrame(simulationRef.current.id);
-          simulationRef.current.id = undefined;
+        if (simulationRef.current.timeoutId) {
+          clearTimeout(simulationRef.current.timeoutId);
+          simulationRef.current.timeoutId = undefined;
         }
         setIsSimulating(false);
     }, []);
