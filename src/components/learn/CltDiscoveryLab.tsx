@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { Loader2 } from 'lucide-react';
@@ -152,6 +152,13 @@ export default function CltDiscoveryLab() {
     return { populationMean: mean, populationStdDev: Math.sqrt(variance) };
   }, [populationData]);
 
+  const { simulatedMean, simulatedStdDev } = useMemo(() => {
+    if (!sampleMeans || sampleMeans.length === 0) return { simulatedMean: 0, simulatedStdDev: 0 };
+    const mean = sampleMeans.reduce((a, b) => a + b, 0) / sampleMeans.length;
+    const variance = sampleMeans.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / sampleMeans.length;
+    return { simulatedMean: mean, simulatedStdDev: Math.sqrt(variance) };
+  }, [sampleMeans]);
+
   const theoreticalMean = populationMean;
   const theoreticalStdDev = populationStdDev / Math.sqrt(sampleSize);
 
@@ -178,6 +185,19 @@ export default function CltDiscoveryLab() {
     setIsSimulating(false);
     fetchPopulationData();
   }, [fetchPopulationData]);
+
+  const AnalysisStat = ({ label, value, theoreticalValue }: { label: string; value: number, theoreticalValue?: number }) => (
+    <div className="flex justify-between items-baseline text-sm">
+      <p className="text-muted-foreground">{label}</p>
+      <div className="flex items-baseline gap-2 font-mono">
+        {theoreticalValue !== undefined && (
+             <p className="text-xs text-muted-foreground/80" title="Theoretical Value">({theoreticalValue.toFixed(3)})</p>
+        )}
+        <p className="text-foreground font-bold">{value.toFixed(3)}</p>
+      </div>
+    </div>
+  );
+
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
@@ -235,6 +255,9 @@ export default function CltDiscoveryLab() {
           <Card>
             <CardHeader>
               <CardTitle>Population Distribution</CardTitle>
+               <CardDescription>
+                μ = {populationMean.toFixed(2)}, σ = {populationStdDev.toFixed(2)}
+              </CardDescription>
             </CardHeader>
             <CardContent className="h-[200px]">
               {isPopulationLoading ? (
@@ -251,10 +274,13 @@ export default function CltDiscoveryLab() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>Distribution of Sample Averages</CardTitle>
+             <CardHeader>
+                <CardTitle>Distribution of Sample Averages</CardTitle>
+                <CardDescription>
+                    Analysis of {sampleMeans.length.toLocaleString()} sample averages.
+                </CardDescription>
             </CardHeader>
-            <CardContent className="h-[300px]">
+            <CardContent className="h-[300px] pl-2 pr-6">
                <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={sampleMeansBinned} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
                     <XAxis dataKey="name" domain={['dataMin', 'dataMax']} type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
@@ -292,6 +318,12 @@ export default function CltDiscoveryLab() {
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
+             {sampleMeans.length > 0 && (
+              <CardContent className="border-t pt-4 space-y-2">
+                 <AnalysisStat label="Simulated Mean" value={simulatedMean} theoreticalValue={theoreticalMean} />
+                 <AnalysisStat label="Simulated Std. Error" value={simulatedStdDev} theoreticalValue={theoreticalStdDev} />
+              </CardContent>
+            )}
           </Card>
         </div>
       </div>
