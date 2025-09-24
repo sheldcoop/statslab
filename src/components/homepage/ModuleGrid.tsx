@@ -49,41 +49,63 @@ const gridContainerVariants = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const gridItemVariants = {
-  hidden: { y: 30, opacity: 0 },
+  hidden: { y: 20, opacity: 0 },
   show: {
     y: 0,
     opacity: 1,
     transition: {
       ease: 'easeOut',
-      duration: 0.4,
+      duration: 0.3,
     },
   },
 };
 
+const footerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+        opacity: 1, 
+        y: 0,
+        transition: {
+            delay: 0.6, // Stagger after the grid items
+            duration: 0.4,
+            ease: "easeOut"
+        }
+    }
+}
+
 export default function ModuleGrid() {
   return (
     <div className="flex h-screen w-full items-center justify-center bg-[#0D1117] p-4 md:p-8">
-      <div className="w-full max-w-6xl">
-        <header className="mb-12 text-center">
-          <h1 className="font-headline text-5xl font-bold md:text-7xl">
+      <motion.div 
+        className="w-full max-w-6xl text-center"
+        initial="hidden"
+        animate="show"
+        variants={gridContainerVariants}
+      >
+        <header className="mb-12">
+          <motion.h1 
+            className="font-headline text-5xl font-bold md:text-7xl"
+            variants={gridItemVariants}
+          >
             Begin Your Journey
-          </h1>
-          <p className="mt-4 text-xl text-[#8B949E]">
+          </motion.h1>
+          <motion.p 
+            className="mt-4 text-xl text-[#8B949E]"
+            variants={gridItemVariants}
+          >
             Master the core pillars of quantitative finance and data science.
-          </p>
+          </motion.p>
         </header>
 
         <motion.div
           className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
           variants={gridContainerVariants}
-          initial="hidden"
-          animate="show"
         >
           {gridItems.map((item, index) => {
             const Icon = item.icon;
@@ -92,12 +114,12 @@ export default function ModuleGrid() {
                 key={index}
                 variants={gridItemVariants}
                 whileHover={{
-                  scale: 1.02,
+                  scale: 1.03,
                   borderColor: 'hsl(var(--secondary))',
-                  boxShadow: '0 0 20px hsl(var(--secondary) / 0.3)',
-                  transition: { duration: 0.2 },
+                  boxShadow: '0 0 25px hsl(var(--secondary) / 0.2)',
+                  transition: { duration: 0.2, ease: 'easeOut' },
                 }}
-                className="relative rounded-lg border-2 border-[#161B22] bg-[#161B22] p-6 text-left"
+                className="relative cursor-pointer rounded-lg border-2 border-[#21262d] bg-[#161B22] p-6 text-left"
               >
                 <div className="mb-4">
                   <Icon className="h-8 w-8 text-secondary" />
@@ -112,16 +134,19 @@ export default function ModuleGrid() {
             );
           })}
         </motion.div>
-         <footer className="mt-12 text-center">
+         <motion.footer 
+            className="mt-12"
+            variants={footerVariants}
+        >
             <motion.button 
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px hsl(var(--primary) / 0.5)" }}
               whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-headline font-bold text-lg text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-headline text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all"
             >
               Launch Terminal <ArrowRight />
             </motion.button>
-        </footer>
-      </div>
+        </motion.footer>
+      </motion.div>
     </div>
   );
 }

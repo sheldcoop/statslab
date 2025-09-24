@@ -21,14 +21,22 @@ const VisualPlaceholder = ({
 
 const ChaosVisual = () => (
   <VisualPlaceholder color="transparent">
-    <div className="grid grid-cols-20 grid-rows-20 w-full h-full">
+    <div className="grid h-full w-full grid-cols-20 grid-rows-20">
       {Array.from({ length: 400 }).map((_, i) => (
-        <div
+        <motion.div
           key={i}
-          className="w-1 h-1 bg-muted/20 rounded-full"
-          style={{
-            transform: `scale(${Math.random() * 1.5 + 0.2})`,
-            opacity: Math.random() * 0.5 + 0.1,
+          className="h-1 w-1 rounded-full bg-muted/20"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: Math.random() * 1.2 + 0.1,
+            opacity: Math.random() * 0.4 + 0.1,
+          }}
+          transition={{
+            duration: 0.8,
+            delay: Math.random() * 2,
+            repeat: Infinity,
+            repeatType: 'reverse',
+            ease: 'easeInOut',
           }}
         />
       ))}
@@ -43,18 +51,60 @@ const LinearAlgebraVisual = () => (
       viewBox="-100 -100 200 200"
       className="opacity-20"
     >
-      <line x1="-100" y1="0" x2="100" y2="0" stroke="hsl(var(--secondary))" />
-      <line x1="0" y1="-100" x2="0" y2="100" stroke="hsl(var(--secondary))" />
+      {/* Axes */}
+      <line
+        x1="-100"
+        y1="0"
+        x2="100"
+        y2="0"
+        stroke="hsl(var(--secondary))"
+        strokeWidth="0.5"
+      />
+      <line
+        x1="0"
+        y1="-100"
+        x2="0"
+        y2="100"
+        stroke="hsl(var(--secondary))"
+        strokeWidth="0.5"
+      />
+
+      {/* Grid lines */}
+      {Array.from({ length: 9 }).map((_, i) => (
+        <React.Fragment key={i}>
+          <line
+            x1="-100"
+            y1={-80 + i * 20}
+            x2="100"
+            y2={-80 + i * 20}
+            stroke="hsl(var(--border))"
+            strokeWidth="0.2"
+          />
+          <line
+            x1={-80 + i * 20}
+            y1="-100"
+            x2={-80 + i * 20}
+            y2="100"
+            stroke="hsl(var(--border))"
+            strokeWidth="0.2"
+          />
+        </React.Fragment>
+      ))}
+
+      {/* Vector */}
       <motion.line
         x1="0"
         y1="0"
-        x2="50"
-        y2="-50"
         stroke="hsl(var(--primary))"
-        strokeWidth="2"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse' }}
+        strokeWidth="3"
+        initial={{ x2: 60, y2: -40 }}
+        animate={{ x2: [-60, 60, -60], y2: [40, -40, 40] }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          repeatType: 'mirror',
+          ease: 'easeInOut',
+        }}
       />
     </svg>
   </VisualPlaceholder>
@@ -68,11 +118,19 @@ const StatisticsVisual = () => (
       className="opacity-20"
       preserveAspectRatio="none"
     >
-      <path
+      <motion.path
         d="M 0 100 C 50 100, 75 20, 100 50 S 150 100, 200 80"
         stroke="hsl(var(--secondary))"
         fill="transparent"
         strokeWidth="2"
+        initial={{ pathLength: 0, stroke: 'hsl(var(--primary))' }}
+        animate={{ pathLength: 1, stroke: 'hsl(var(--secondary))' }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: 'reverse',
+          ease: 'easeInOut',
+        }}
       />
     </svg>
   </VisualPlaceholder>
@@ -93,16 +151,30 @@ const TimeSeriesVisual = () => (
         strokeWidth="2"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
-        transition={{ duration: 2, ease: 'easeInOut' }}
+        transition={{
+          duration: 2,
+          ease: 'easeInOut',
+          repeat: Infinity,
+          repeatType: 'reverse',
+        }}
       />
     </svg>
   </VisualPlaceholder>
 );
 const PythonVisual = () => (
   <VisualPlaceholder color="transparent">
-    <code className="text-4xl text-primary opacity-30 font-headline">
+    <motion.code
+      className="font-headline text-4xl text-primary opacity-30"
+      initial={{ opacity: 0.3 }}
+      animate={{ opacity: [0.3, 0.8, 0.3] }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+    >
       {'< >'}
-    </code>
+    </motion.code>
   </VisualPlaceholder>
 );
 
