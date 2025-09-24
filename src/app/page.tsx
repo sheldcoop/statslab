@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
   Calculator,
@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
-import LinearAlgebraVisual from '@/components/homepage/LinearAlgebraVisual';
+import { useState, Suspense, lazy } from 'react';
+
+// Dynamically import the 3D visual component to ensure it's client-only
+const LinearAlgebraVisual = lazy(() => import('@/components/homepage/LinearAlgebraVisual'));
 
 const GridPanel = ({
   className,
@@ -31,11 +33,16 @@ const GridPanel = ({
     onHoverStart={onHoverStart}
     onHoverEnd={onHoverEnd}
     variants={gridItemVariants}
-    whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-    className="relative"
+    whileHover={{
+      scale: 1.02,
+      borderColor: 'hsl(var(--primary))',
+      boxShadow: '0 0 15px hsl(var(--primary) / 0.5)',
+      transition: { duration: 0.3 },
+    }}
+    className="relative rounded-lg border border-transparent"
   >
     <Card
-      className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 hover:shadow-2xl hover:shadow-primary/10 ${className}`}
+      className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 ${className}`}
     >
       {children}
     </Card>
@@ -96,14 +103,17 @@ export default function Home() {
               <div className="absolute inset-0 z-0">
                 <AnimatePresence>
                   {isLinearAlgebraHovered && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.5 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <LinearAlgebraVisual />
-                    </motion.div>
+                     <Suspense fallback={null}>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 0.5 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.5 }}
+                          className="h-full w-full"
+                        >
+                          <LinearAlgebraVisual />
+                        </motion.div>
+                     </Suspense>
                   )}
                 </AnimatePresence>
               </div>
@@ -208,19 +218,3 @@ export default function Home() {
     </main>
   );
 }
-
-const AnimatePresence = ({
-  children,
-  initial = true,
-}: {
-  children: React.ReactNode;
-  initial?: boolean;
-}) => {
-  const [present, setPresent] = useState(true);
-
-  return (
-    <>
-      {present && children}
-    </>
-  )
-};
