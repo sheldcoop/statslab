@@ -74,7 +74,6 @@ const binData = (data: number[], numBins: number) => {
 
 // --- Main Component ---
 export default function CltDiscoveryLab() {
-  const [scene, setScene] = useState(1);
   const [populationType, setPopulationType] = useState('skewed');
   const [populationData, setPopulationData] = useState<number[]>([]);
   const [sampleMeans, setSampleMeans] = useState<number[]>([]);
@@ -86,8 +85,13 @@ export default function CltDiscoveryLab() {
   useEffect(() => {
     setPopulationData(generateData(populationType, 10000));
     setSampleMeans([]);
-    setScene(1);
   }, [populationType]);
+  
+  const handlePopulationChange = (value: string) => {
+    setPopulationType(value);
+    setSampleMeans([]); // Clear previous simulation results
+  };
+
 
   const populationBinned = useMemo(
     () => binData(populationData, 20),
@@ -98,19 +102,12 @@ export default function CltDiscoveryLab() {
     [sampleMeans]
   );
   
-  const takeSingleSample = () => {
-    const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
-    const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
-    setSampleMeans([mean]);
-    setScene(2);
-  };
-  
   const runSimulation = useCallback(() => {
     setIsSimulating(true);
     setSampleMeans([]);
     
     let means: number[] = [];
-    const batchSize = 100;
+    const batchSize = Math.max(100, numSamples / 50); // Ensure at least some batches
     let i = 0;
 
     const interval = setInterval(() => {
@@ -134,10 +131,10 @@ export default function CltDiscoveryLab() {
 
 
   useEffect(() => {
-    if (scene === 3 && !isSimulating) {
-        runSimulation();
-    }
-  }, [scene, isSimulating, runSimulation]);
+    // Automatically run simulation on first load
+    runSimulation();
+  }, [runSimulation]);
+
 
   const populationMean = useMemo(() => populationData.reduce((a,b) => a+b, 0) / populationData.length, [populationData]);
   const populationStdDev = useMemo(() => {
@@ -164,74 +161,55 @@ export default function CltDiscoveryLab() {
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
-       <AnimatePresence mode="wait">
-        <motion.div
-          key={scene}
+       <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          {scene === 1 && <h2 className="font-headline text-3xl md:text-4xl">If we take an average from this weird data, what will it look like?</h2>}
-          {scene === 2 && <h2 className="font-headline text-3xl md:text-4xl">Okay, that's one average. Not very useful. What if we did this 5,000 times?</h2>}
-          {scene >= 3 && <h2 className="font-headline text-4xl md:text-5xl text-primary">From chaos comes order. This is the Central Limit Theorem.</h2>}
+          <h2 className="font-headline text-4xl md:text-5xl text-primary">From chaos comes order. This is the Central Limit Theorem.</h2>
+          <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">No matter how strange the population data, the distribution of its sample averages will always form a perfect normal distribution. Use the lab below to see it for yourself.</p>
         </motion.div>
-      </AnimatePresence>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>{scene < 4 ? 'The World of Chaos' : 'The Discovery Lab'}</CardTitle>
+            <CardTitle>The Discovery Lab</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <AnimatePresence>
-                {(scene < 4) && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="space-y-4"
-                    >
-                         {scene === 1 && <Button onClick={takeSingleSample} className="w-full" size="lg">Take One Sample</Button>}
-                         {scene === 2 && <Button onClick={() => setScene(3)} className="w-full" size="lg">Run the Simulation</Button>}
-                         {scene === 3 && isSimulating && <p className="text-center text-muted-foreground">Simulating...</p>}
-                         {scene === 3 && !isSimulating && <Button onClick={() => setScene(4)} className="w-full" size="lg">Enter the Lab</Button>}
-                    </motion.div>
-                )}
-                
-                {scene === 4 && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { delay: 0.5 } }}
-                        className="space-y-6"
-                    >
-                        <div>
-                            <Label>Population Shape</Label>
-                             <Select value={populationType} onValueChange={setPopulationType}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="skewed">Skewed</SelectItem>
-                                    <SelectItem value="bimodal">Bimodal</SelectItem>
-                                    <SelectItem value="uniform">Uniform</SelectItem>
-                                    <SelectItem value="normal">Normal</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                         <div>
-                            <Label>Sample Size: {sampleSize}</Label>
-                            <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={100} step={1} />
-                        </div>
-                        <Button onClick={runSimulation} disabled={isSimulating} className="w-full">
-                            {isSimulating ? 'Simulating...' : 'Re-run Simulation'}
-                        </Button>
-                        <div className="flex items-center space-x-2">
-                           <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
-                           <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
-                        </div>
-                    </motion.div>
-                )}
-             </AnimatePresence>
+             <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { delay: 0.5 } }}
+                className="space-y-6"
+            >
+                <div>
+                    <Label>Population Shape</Label>
+                     <Select value={populationType} onValueChange={handlePopulationChange}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="skewed">Skewed</SelectItem>
+                            <SelectItem value="bimodal">Bimodal</SelectItem>
+                            <SelectItem value="uniform">Uniform</SelectItem>
+                            <SelectItem value="normal">Normal</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div>
+                    <Label>Sample Size: {sampleSize}</Label>
+                    <Slider value={[sampleSize]} onValueChange={([v]) => setSampleSize(v)} min={2} max={200} step={1} />
+                </div>
+                <div>
+                    <Label>Number of Samples: {numSamples.toLocaleString()}</Label>
+                    <Slider value={[numSamples]} onValueChange={([v]) => setNumSamples(v)} min={100} max={20000} step={100} />
+                </div>
+                <Button onClick={runSimulation} disabled={isSimulating} className="w-full">
+                    {isSimulating ? 'Simulating...' : 'Run Simulation'}
+                </Button>
+                <div className="flex items-center space-x-2">
+                   <Switch id="theoretical-curve" checked={showTheoretical} onCheckedChange={setShowTheoretical} />
+                   <Label htmlFor="theoretical-curve">Show Theoretical Curve</Label>
+                </div>
+            </motion.div>
           </CardContent>
         </Card>
 
