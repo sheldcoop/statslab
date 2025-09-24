@@ -47,7 +47,7 @@ const SceneLinearAlgebra = () => {
         color: '#4ecdc4', // Green
       },
       {
-        direction: new THREE.Vector3(0, 0, 1),
+        direction: new THREE A.Vector3(0, 0, 1),
         color: '#45b7d1', // Blue
       },
     ],
