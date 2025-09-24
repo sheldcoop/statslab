@@ -62,7 +62,7 @@ const binData = (data: number[], numBins: number) => {
   }
 
   const binSize = (max - min) / numBins;
-    if (binSize === 0) {
+  if (binSize === 0) {
     // Handle case where all data points are the same
     return [{ name: min.toFixed(1), value: data.length, x0: min, x1: max }];
   }
@@ -175,7 +175,11 @@ export default function CltDiscoveryLab() {
 
   const theoreticalCurveData = useMemo(() => {
       if (!showTheoretical || sampleMeansBinned.length === 0 || theoreticalStdDev === 0) return [];
-      const binSize = sampleMeansBinned[0].x1 - sampleMeansBinned[0].x0;
+      const binInfo = sampleMeansBinned[0];
+      if (!binInfo) return [];
+      const binSize = binInfo.x1 - binInfo.x0;
+      if(binSize === 0) return [];
+
       const scale = sampleMeans.length * binSize;
       
       return sampleMeansBinned.map(bin => {
@@ -322,13 +326,13 @@ export default function CltDiscoveryLab() {
                   {showTheoretical && theoreticalCurveData.length > 0 && (
                     <Line
                         type="monotone"
-                        dataKey="y"
                         data={theoreticalCurveData}
+                        dataKey="y"
                         stroke="hsl(var(--accent))"
                         strokeWidth={2}
                         dot={false}
                         animationDuration={300}
-                        dataKey="x"
+                        xAxisId={0}
                     />
                   )}
                 </BarChart>
