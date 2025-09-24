@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
 
 const GridPanel = ({
   children,
@@ -67,6 +66,7 @@ const AnimatedIcon = ({ children }: { children: React.ReactNode }) => {
   return (
     <motion.div
       variants={{
+        initial: { scale: 1, rotate: 0 },
         hover: { scale: 1.1, rotate: 5 },
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 10 }}
@@ -78,25 +78,6 @@ const AnimatedIcon = ({ children }: { children: React.ReactNode }) => {
 
 
 export default function Home() {
-  const [hoveredStates, setHoveredStates] = useState(Array(6).fill(false));
-
-  const handleHoverStart = (index: number) => {
-    const newHoveredStates = [...hoveredStates];
-    newHoveredStates[index] = true;
-    setHoveredStates(newHoveredStates);
-  };
-
-  const handleHoverEnd = (index: number) => {
-    const newHoveredStates = [...hoveredStates];
-    newHoveredStates[index] = false;
-    setHoveredStates(newHoveredStates);
-  };
-
-  const iconVariants = {
-    initial: { scale: 1, rotate: 0 },
-    hover: { scale: 1.1, rotate: 5, transition: { type: 'spring', stiffness: 300, damping: 10 } },
-  };
-
   return (
     <main className="min-h-screen w-full bg-background font-mono text-foreground">
       <div className="container mx-auto p-4 md:p-8">
@@ -121,9 +102,8 @@ export default function Home() {
           <motion.div
             className="md:col-span-1 lg:col-span-2"
             variants={gridItemVariants}
-            onHoverStart={() => handleHoverStart(0)}
-            onHoverEnd={() => handleHoverEnd(0)}
-            animate={hoveredStates[0] ? 'hover' : 'initial'}
+            initial="initial"
+            whileHover="hover"
           >
             <GridPanel>
               <CardHeader>
@@ -145,16 +125,15 @@ export default function Home() {
           <motion.div
             className="md:col-span-1 lg:col-span-2"
             variants={gridItemVariants}
-            onHoverStart={() => handleHoverStart(1)}
-            onHoverEnd={() => handleHoverEnd(1)}
-            animate={hoveredStates[1] ? 'hover' : 'initial'}
+            initial="initial"
+            whileHover="hover"
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                   <motion.div variants={iconVariants}>
+                   <AnimatedIcon>
                     <Sigma className="text-primary" />
-                  </motion.div>
+                  </AnimatedIcon>
                   Statistics & Probability
                 </CardTitle>
               </CardHeader>
@@ -169,16 +148,15 @@ export default function Home() {
           <motion.div
             className="md:col-span-1 lg:col-span-2"
             variants={gridItemVariants}
-            onHoverStart={() => handleHoverStart(2)}
-            onHoverEnd={() => handleHoverEnd(2)}
-            animate={hoveredStates[2] ? 'hover' : 'initial'}
+            initial="initial"
+            whileHover="hover"
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <motion.div variants={iconVariants}>
+                  <AnimatedIcon>
                     <Code className="text-primary" />
-                  </motion.div>
+                  </AnimatedIcon>
                   Python for Quants
                 </CardTitle>
               </CardHeader>
@@ -193,16 +171,15 @@ export default function Home() {
           <motion.div
             className="md:col-span-1 lg:col-span-2"
             variants={gridItemVariants}
-            onHoverStart={() => handleHoverStart(3)}
-            onHoverEnd={() => handleHoverEnd(3)}
-            animate={hoveredStates[3] ? 'hover' : 'initial'}
+            initial="initial"
+            whileHover="hover"
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <motion.div variants={iconVariants}>
+                  <AnimatedIcon>
                     <TrendingUp className="text-primary" />
-                  </motion.div>
+                  </AnimatedIcon>
                   Time Series Analysis
                 </CardTitle>
               </CardHeader>
@@ -217,16 +194,15 @@ export default function Home() {
           <motion.div
             className="md:col-span-1 lg:col-span-2"
             variants={gridItemVariants}
-            onHoverStart={() => handleHoverStart(4)}
-            onHoverEnd={() => handleHoverEnd(4)}
-            animate={hoveredStates[4] ? 'hover' : 'initial'}
+            initial="initial"
+            whileHover="hover"
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <motion.div variants={iconVariants}>
+                  <AnimatedIcon>
                     <Cpu className="text-primary" />
-                  </motion.div>
+                  </AnimatedIcon>
                   Machine Learning
                 </CardTitle>
               </CardHeader>
@@ -241,16 +217,15 @@ export default function Home() {
           <motion.div
             className="md:col-span-1 lg:col-span-2"
             variants={gridItemVariants}
-            onHoverStart={() => handleHoverStart(5)}
-            onHoverEnd={() => handleHoverEnd(5)}
-            animate={hoveredStates[5] ? 'hover' : 'initial'}
+            initial="initial"
+            whileHover="hover"
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <motion.div variants={iconVariants}>
+                  <AnimatedIcon>
                     <Calculator className="text-primary" />
-                  </motion.div>
+                  </AnimatedIcon>
                   Algorithmic Trading
                 </CardTitle>
               </CardHeader>
