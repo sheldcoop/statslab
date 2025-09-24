@@ -1,11 +1,11 @@
 "use client";
 
 import { Suspense, useRef } from 'react';
-import type { MotionValue } from 'framer-motion';
 import { useScroll } from 'framer-motion';
-import ScrollytellingOverlay from '@/components/homepage/ScrollytellingOverlay';
+import type { MotionValue } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
-import ScrollytellingCanvas from './ScrollytellingCanvas';
+import ScrollytellingCanvas from '@/components/homepage/ScrollytellingCanvas';
+import ScrollytellingOverlay from '@/components/homepage/ScrollytellingOverlay';
 
 export default function HomePageClient() {
   const scrollRef = useRef<HTMLDivElement>(null);

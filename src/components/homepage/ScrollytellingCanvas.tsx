@@ -17,12 +17,19 @@ function CameraRig({ scrollYProgress }: CameraRigProps) {
   const cameraY = useTransform(scrollYProgress, [0, 0.2], [0, 0]);
   const cameraLookAtY = useTransform(scrollYProgress, [0, 1], [0, 0.5]);
 
-  useFrame((state, delta) => {
-    const targetPosition = new THREE.Vector3(0, cameraY.get(), cameraZ.get());
-    state.camera.position.lerp(targetPosition, delta * 2.0);
+  useFrame((state) => {
+    const newCameraZ = cameraZ.get();
+    if (state.camera.position.z !== newCameraZ) {
+        state.camera.position.z = newCameraZ;
+    }
 
-    const targetLookAt = new THREE.Vector3(0, cameraLookAtY.get(), 0);
-    state.camera.lookAt(targetLookAt);
+    const newCameraY = cameraY.get();
+     if (state.camera.position.y !== newCameraY) {
+        state.camera.position.y = newCameraY;
+    }
+
+    const newLookAtY = cameraLookAtY.get();
+    state.camera.lookAt(0, newLookAtY, 0);
   });
   return null;
 }

@@ -2,15 +2,15 @@
 
 import dynamic from 'next/dynamic';
 
-const CanvasLoader = dynamic(
-  () => import('@/components/homepage/CanvasLoader'),
+const HomePageClient = dynamic(
+  () => import('@/components/homepage/HomePageClient'),
   { ssr: false }
 );
 
 export default function Home() {
   return (
     <main>
-      <CanvasLoader />
+      <HomePageClient />
     </main>
   );
 }
