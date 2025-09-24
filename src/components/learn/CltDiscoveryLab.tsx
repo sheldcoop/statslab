@@ -123,7 +123,6 @@ export default function CltDiscoveryLab() {
     setCurrentAnimatedMean(null);
 
     let i = 0;
-    const allMeans: number[] = [];
 
     const simulationStep = () => {
       if (i >= numSamples) {
@@ -133,32 +132,22 @@ export default function CltDiscoveryLab() {
         return;
       }
 
-      // --- Animation Part ---
       const sample = Array.from({ length: sampleSize }, () => populationData[Math.floor(Math.random() * populationData.length)]);
       const mean = sample.reduce((a, b) => a + b, 0) / sampleSize;
       
       setCurrentAnimatedSample(sample);
       setCurrentAnimatedMean(mean);
       
-      // --- Update final distribution ---
-      allMeans.push(mean);
-      setSampleMeans([...allMeans]);
+      setSampleMeans(prevMeans => [...prevMeans, mean]);
       
       i++;
       
-      setTimeout(simulationStep, 750); 
+      setTimeout(simulationStep, 10); 
     };
 
     simulationStep();
 
   }, [sampleSize, numSamples, populationData]);
-
-
-  useEffect(() => {
-    // Automatically run simulation on first load
-    // runSimulation();
-  }, []);
-
 
   const populationMean = useMemo(() => populationData.reduce((a,b) => a+b, 0) / populationData.length, [populationData]);
   const populationStdDev = useMemo(() => {
@@ -351,3 +340,5 @@ export default function CltDiscoveryLab() {
     </div>
   );
 }
+
+    
