@@ -33,16 +33,17 @@ const generatePopulationData = (distribution: string, count: number) => {
       case 'positive-skew':
         return Array.from({ length: count }, randomLogNormal(0, 1.5));
       case 'negative-skew':
-        return Array.from({ length: count }, () => 10 - randomLogNormal(0, 1.5)());
+        // Centering it around a value like 10 to ensure most values are positive
+        return Array.from({ length: count }, () => 15 - randomLogNormal(0, 1.5)());
       case 'bimodal': {
-        const bimodal = () => (Math.random() < 0.5 ? randomNormal(2, 1)() : randomNormal(8, 1)());
+        const bimodal = () => (Math.random() < 0.5 ? randomNormal(3, 1.5)() : randomNormal(9, 1.5)());
         return Array.from({ length: count }, bimodal);
       }
       case 'uniform':
-        return Array.from({ length: count }, () => Math.random() * 10);
+        return Array.from({ length: count }, () => Math.random() * 12);
       case 'normal':
       default:
-        return Array.from({ length: count }, randomNormal(5, 1.5));
+        return Array.from({ length: count }, randomNormal(6, 1.5));
     }
 };
 
@@ -51,6 +52,16 @@ const binData = (data: number[] | undefined, numBins: number, domain?: [number, 
     
     let min = domain ? domain[0] : Math.min(...data);
     let max = domain ? domain[1] : Math.max(...data);
+    
+    // For skewed data, outliers can ruin the visualization.
+    // We can cap the max at the 99th percentile for a better view.
+    if (!domain) {
+        const sortedData = [...data].sort((a, b) => a - b);
+        const p99 = sortedData[Math.floor(0.99 * sortedData.length)];
+        if (max > p99 * 1.5) { // Only apply if there are significant outliers
+            max = p99;
+        }
+    }
     
     if (min === max) {
       min = min - 1;
@@ -68,9 +79,11 @@ const binData = (data: number[] | undefined, numBins: number, domain?: [number, 
     }));
 
     for (const d of data) {
-        const binIndex = Math.min(Math.floor((d - min) / binSize), numBins - 1);
-        if (bins[binIndex]) {
-            bins[binIndex].value++;
+        if (d >= min && d <= max) {
+            const binIndex = Math.min(Math.floor((d - min) / binSize), numBins - 1);
+            if (bins[binIndex]) {
+                bins[binIndex].value++;
+            }
         }
     }
     return bins;
@@ -133,17 +146,16 @@ export default function CltDiscoveryLab() {
     setIsPopulationLoading(false);
   }, [populationShape]);
 
-  const { populationMean, populationStdDev, populationDomain } = useMemo(() => {
-    if (!populationData || populationData.length === 0) return { populationMean: 0, populationStdDev: 0, populationDomain: [0,10] as [number, number]};
+  const { populationMean, populationStdDev } = useMemo(() => {
+    if (!populationData || populationData.length === 0) return { populationMean: 0, populationStdDev: 0 };
     const mean = populationData.reduce((a,b) => a+b, 0) / populationData.length;
     const variance = populationData.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / populationData.length;
     const stdDev = Math.sqrt(variance);
-    const domain: [number, number] = [Math.min(...populationData), Math.max(...populationData)];
-    return { populationMean: mean, populationStdDev: stdDev, populationDomain: domain };
+    return { populationMean: mean, populationStdDev: stdDev };
   }, [populationData]);
   
   const populationBinned = useMemo(() => binData(populationData, 50), [populationData]);
-  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
+  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans, sampleMeans.length]);
 
   const runFullSimulation = useCallback(() => {
     if (isSimulating) return;
