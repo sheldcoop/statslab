@@ -52,7 +52,6 @@ export default function TextOverlay({
 }) {
   return (
     <div className="pointer-events-none absolute inset-0">
-      {/* Each section gets a 20% slice of the scroll progress */}
       <TextSection
         scrollYProgress={scrollYProgress}
         range={[0.1, 0.3]}
@@ -73,7 +72,7 @@ export default function TextOverlay({
       />
        <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.7, 0.9]}
+        range={[0.7, 0.85]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
