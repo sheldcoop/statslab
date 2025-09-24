@@ -12,17 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const SceneLinearAlgebra = dynamic(
-  () => import('../components/homepage/SceneLinearAlgebra'),
-  {
-    ssr: false,
-    loading: () => <Skeleton className="h-full w-full" />,
-  }
-);
 
 
 const GridPanel = ({
@@ -68,11 +58,6 @@ export default function Home() {
                 Vectors, matrices, and tensors. The language of data.
               </p>
             </CardContent>
-            <Suspense fallback={<Skeleton className="absolute inset-0 h-full w-full" />}>
-              <div className="absolute inset-0 h-full w-full">
-                <SceneLinearAlgebra />
-              </div>
-            </Suspense>
           </GridPanel>
 
           <GridPanel className="md:col-span-1 lg:col-span-2">
