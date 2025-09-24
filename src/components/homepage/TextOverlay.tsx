@@ -60,7 +60,7 @@ export default function TextOverlay({
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.75, 0.85, 0.95, 1.0]}
+        range={[0.75, 0.8, 0.875, 0.95]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />

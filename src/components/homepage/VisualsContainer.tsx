@@ -196,16 +196,16 @@ export default function VisualsContainer({
   return (
     <div className="sticky top-0 h-screen w-full">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.35, 0.45]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.35, 0.5]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.35, 0.45, 0.55, 0.65]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.5, 0.6, 0.75]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.55, 0.65, 0.75, 0.85]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.65, 0.75, 0.85, 1.0]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.85, 0.95, 1.0]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.8, 0.875, 0.95]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress}>
@@ -222,7 +222,7 @@ const ModuleGridVisual = ({
   scrollYProgress: MotionValue<number>;
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0.85, 0.95], [0, 1]);
+  const opacity = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
       <ChaosVisual />
@@ -237,7 +237,7 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.05, 0.25], [1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.125, 0.25], [1, 1, 0]);
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
       <ChaosVisual />
