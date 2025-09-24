@@ -16,29 +16,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 
 const GridPanel = ({
-  className,
   children,
 }: {
   className?: string;
   children: React.ReactNode;
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <motion.div
       variants={gridItemVariants}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
       whileHover={{
         scale: 1.02,
         borderColor: 'hsl(var(--primary))',
         boxShadow: '0 0 20px hsl(var(--primary) / 0.4)',
         transition: { duration: 0.3 },
       }}
-      className="relative rounded-lg border-2 border-transparent"
+      className="relative rounded-lg border-2 border-transparent h-full"
     >
       <Card
-        className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80 ${className}`}
+        className={`h-full overflow-hidden backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-card/80`}
       >
         {children}
       </Card>
@@ -68,19 +63,19 @@ const gridItemVariants = {
   },
 };
 
-const AnimatedIcon = ({ isHovered, children }: { isHovered: boolean, children: React.ReactNode }) => {
+const AnimatedIcon = ({ children }: { children: React.ReactNode }) => {
   return (
     <motion.div
-      animate={{
-        scale: isHovered ? 1.1 : 1,
-        rotate: isHovered ? 5 : 0,
+      variants={{
+        hover: { scale: 1.1, rotate: 5 },
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 10 }}
     >
       {children}
     </motion.div>
-  )
+  );
 };
+
 
 export default function Home() {
   const [hoveredStates, setHoveredStates] = useState(Array(6).fill(false));
@@ -97,6 +92,10 @@ export default function Home() {
     setHoveredStates(newHoveredStates);
   };
 
+  const iconVariants = {
+    initial: { scale: 1, rotate: 0 },
+    hover: { scale: 1.1, rotate: 5, transition: { type: 'spring', stiffness: 300, damping: 10 } },
+  };
 
   return (
     <main className="min-h-screen w-full bg-background font-mono text-foreground">
@@ -124,11 +123,12 @@ export default function Home() {
             variants={gridItemVariants}
             onHoverStart={() => handleHoverStart(0)}
             onHoverEnd={() => handleHoverEnd(0)}
+            animate={hoveredStates[0] ? 'hover' : 'initial'}
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon isHovered={hoveredStates[0]}>
+                  <AnimatedIcon>
                     <Orbit className="text-primary" />
                   </AnimatedIcon>
                   Linear Algebra
@@ -147,13 +147,14 @@ export default function Home() {
             variants={gridItemVariants}
             onHoverStart={() => handleHoverStart(1)}
             onHoverEnd={() => handleHoverEnd(1)}
+            animate={hoveredStates[1] ? 'hover' : 'initial'}
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                   <AnimatedIcon isHovered={hoveredStates[1]}>
+                   <motion.div variants={iconVariants}>
                     <Sigma className="text-primary" />
-                  </AnimatedIcon>
+                  </motion.div>
                   Statistics & Probability
                 </CardTitle>
               </CardHeader>
@@ -170,13 +171,14 @@ export default function Home() {
             variants={gridItemVariants}
             onHoverStart={() => handleHoverStart(2)}
             onHoverEnd={() => handleHoverEnd(2)}
+            animate={hoveredStates[2] ? 'hover' : 'initial'}
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon isHovered={hoveredStates[2]}>
+                  <motion.div variants={iconVariants}>
                     <Code className="text-primary" />
-                  </AnimatedIcon>
+                  </motion.div>
                   Python for Quants
                 </CardTitle>
               </CardHeader>
@@ -193,13 +195,14 @@ export default function Home() {
             variants={gridItemVariants}
             onHoverStart={() => handleHoverStart(3)}
             onHoverEnd={() => handleHoverEnd(3)}
+            animate={hoveredStates[3] ? 'hover' : 'initial'}
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon isHovered={hoveredStates[3]}>
+                  <motion.div variants={iconVariants}>
                     <TrendingUp className="text-primary" />
-                  </AnimatedIcon>
+                  </motion.div>
                   Time Series Analysis
                 </CardTitle>
               </CardHeader>
@@ -216,13 +219,14 @@ export default function Home() {
             variants={gridItemVariants}
             onHoverStart={() => handleHoverStart(4)}
             onHoverEnd={() => handleHoverEnd(4)}
+            animate={hoveredStates[4] ? 'hover' : 'initial'}
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon isHovered={hoveredStates[4]}>
+                  <motion.div variants={iconVariants}>
                     <Cpu className="text-primary" />
-                  </AnimatedIcon>
+                  </motion.div>
                   Machine Learning
                 </CardTitle>
               </CardHeader>
@@ -239,13 +243,14 @@ export default function Home() {
             variants={gridItemVariants}
             onHoverStart={() => handleHoverStart(5)}
             onHoverEnd={() => handleHoverEnd(5)}
+            animate={hoveredStates[5] ? 'hover' : 'initial'}
           >
             <GridPanel>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon isHovered={hoveredStates[5]}>
+                  <motion.div variants={iconVariants}>
                     <Calculator className="text-primary" />
-                  </AnimatedIcon>
+                  </motion.div>
                   Algorithmic Trading
                 </CardTitle>
               </CardHeader>
