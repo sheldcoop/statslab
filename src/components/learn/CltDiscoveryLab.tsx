@@ -93,8 +93,9 @@ const binData = (data: number[] | undefined, numBins: number, domain?: [number, 
       if (max > p99 * 1.5) {
           max = p99;
       }
-      if (min < 0 && Math.abs(min) > p99 * 1.5) {
-        min = -p99;
+      const p1 = sortedData[Math.floor(0.01 * sortedData.length)];
+       if (min < p1 * 1.5) {
+        min = p1;
       }
   }
 
@@ -314,7 +315,7 @@ const SampleMeansChart = ({ sampleMeans, theoreticalMean, theoreticalStdDev, sho
     };
 
     const theoreticalCurveData = useMemo(() => {
-      if (binnedData.length === 0 || !sampleMeans.length) return [];
+      if (!binnedData.length || !sampleMeans.length || !theoreticalStdDev) return [];
       const scale = sampleMeans.length * (binnedData[0].x1 - binnedData[0].x0);
       return binnedData.map(bin => ({
           x: bin.x0 + (bin.x1 - bin.x0)/2,
@@ -353,7 +354,7 @@ const SampleMeansChart = ({ sampleMeans, theoreticalMean, theoreticalStdDev, sho
                         />
                         <Bar dataKey="value" fill="hsl(var(--primary))" radius={[2, 2, 0, 0]} maxBarSize={40} animationDuration={isSimulating ? 0 : 300} />
 
-                        {showTheoreticalCurve && theoreticalCurveData.length > 0 && (
+                        {showTheoreticalCurve && theoreticalCurveData.length > 0 && theoreticalMean > 0 && (
                             <ReferenceLine x={theoreticalMean} stroke="hsl(var(--accent))" strokeDasharray="3 3" strokeWidth={2} label={{ value: 'μ', fill: 'hsl(var(--accent))', position: 'insideTop' }} />
                         )}
                         {showTheoreticalCurve && theoreticalCurveData.length > 1 && (
@@ -492,7 +493,7 @@ isPopulationLoading,
                     'Run New Simulation'
                   )}
                 </Button>
-                <Button onClick={stopAndClear} className="w-full" variant="outline" disabled={isSimulating}>
+                <Button onClick={stopAndClear} className="w-full" variant="outline">
                   Reset
                 </Button>
               </div>
@@ -514,5 +515,3 @@ isPopulationLoading,
     </div>
   );
 }
-
-    
