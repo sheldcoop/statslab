@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
   Calculator,
@@ -13,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CommandPalette } from '@/components/CommandPalette';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 
 const GridPanel = ({
   children,
@@ -78,166 +81,184 @@ const AnimatedIcon = ({ children }: { children: React.ReactNode }) => {
 
 
 export default function Home() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
+
   return (
     <main className="min-h-screen w-full bg-background font-mono text-foreground">
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LineChart className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">
-              StatSpark
-            </h1>
-          </div>
-          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-            Launch Terminal <ArrowRight className="ml-2" />
-          </Button>
-        </header>
-
-        <motion.div
-          className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6"
-          variants={gridContainerVariants}
-          initial="hidden"
-          animate="show"
-        >
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            initial="initial"
-            whileHover="hover"
-          >
-            <GridPanel>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon>
-                    <Orbit className="text-primary" />
-                  </AnimatedIcon>
-                  Linear Algebra
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Vectors, matrices, and tensors. The language of data.
-                </p>
-              </CardContent>
-            </GridPanel>
-          </motion.div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <div className="container mx-auto p-4 md:p-8">
+          <header className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <LineChart className="h-8 w-8 text-primary" />
+              <h1 className="text-2xl font-bold text-foreground">
+                StatSpark
+              </h1>
+            </div>
+            <DialogTrigger asChild>
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Launch Terminal <ArrowRight className="ml-2" />
+              </Button>
+            </DialogTrigger>
+          </header>
 
           <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            initial="initial"
-            whileHover="hover"
+            className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6"
+            variants={gridContainerVariants}
+            initial="hidden"
+            animate="show"
           >
-            <GridPanel>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                   <AnimatedIcon>
-                    <Sigma className="text-primary" />
-                  </AnimatedIcon>
-                  Statistics & Probability
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Quantifying uncertainty and making sense of distributions.
-                </p>
-              </CardContent>
-            </GridPanel>
-          </motion.div>
+            <motion.div
+              className="md:col-span-1 lg:col-span-2"
+              variants={gridItemVariants}
+              initial="initial"
+              whileHover="hover"
+            >
+              <GridPanel>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AnimatedIcon>
+                      <Orbit className="text-primary" />
+                    </AnimatedIcon>
+                    Linear Algebra
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Vectors, matrices, and tensors. The language of data.
+                  </p>
+                </CardContent>
+              </GridPanel>
+            </motion.div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            initial="initial"
-            whileHover="hover"
-          >
-            <GridPanel>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon>
-                    <Code className="text-primary" />
-                  </AnimatedIcon>
-                  Python for Quants
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  NumPy, Pandas, SciPy. The tools of the trade.
-                </p>
-              </CardContent>
-            </GridPanel>
-          </motion.div>
+            <motion.div
+              className="md:col-span-1 lg:col-span-2"
+              variants={gridItemVariants}
+              initial="initial"
+              whileHover="hover"
+            >
+              <GridPanel>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                     <AnimatedIcon>
+                      <Sigma className="text-primary" />
+                    </AnimatedIcon>
+                    Statistics & Probability
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Quantifying uncertainty and making sense of distributions.
+                  </p>
+                </CardContent>
+              </GridPanel>
+            </motion.div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            initial="initial"
-            whileHover="hover"
-          >
-            <GridPanel>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon>
-                    <TrendingUp className="text-primary" />
-                  </AnimatedIcon>
-                  Time Series Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  ARIMA, GARCH, and forecasting market movements.
-                </p>
-              </CardContent>
-            </GridPanel>
-          </motion.div>
+            <motion.div
+              className="md:col-span-1 lg:col-span-2"
+              variants={gridItemVariants}
+              initial="initial"
+              whileHover="hover"
+            >
+              <GridPanel>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AnimatedIcon>
+                      <Code className="text-primary" />
+                    </AnimatedIcon>
+                    Python for Quants
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    NumPy, Pandas, SciPy. The tools of the trade.
+                  </p>
+                </CardContent>
+              </GridPanel>
+            </motion.div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            initial="initial"
-            whileHover="hover"
-          >
-            <GridPanel>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon>
-                    <Cpu className="text-primary" />
-                  </AnimatedIcon>
-                  Machine Learning
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Building predictive models for financial markets.
-                </p>
-              </CardContent>
-            </GridPanel>
-          </motion.div>
+            <motion.div
+              className="md:col-span-1 lg:col-span-2"
+              variants={gridItemVariants}
+              initial="initial"
+              whileHover="hover"
+            >
+              <GridPanel>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AnimatedIcon>
+                      <TrendingUp className="text-primary" />
+                    </AnimatedIcon>
+                    Time Series Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    ARIMA, GARCH, and forecasting market movements.
+                  </p>
+                </CardContent>
+              </GridPanel>
+            </motion.div>
 
-          <motion.div
-            className="md:col-span-1 lg:col-span-2"
-            variants={gridItemVariants}
-            initial="initial"
-            whileHover="hover"
-          >
-            <GridPanel>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AnimatedIcon>
-                    <Calculator className="text-primary" />
-                  </AnimatedIcon>
-                  Algorithmic Trading
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  From strategy backtesting to live deployment.
-                </p>
-              </CardContent>
-            </GridPanel>
+            <motion.div
+              className="md:col-span-1 lg:col-span-2"
+              variants={gridItemVariants}
+              initial="initial"
+              whileHover="hover"
+            >
+              <GridPanel>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AnimatedIcon>
+                      <Cpu className="text-primary" />
+                    </AnimatedIcon>
+                    Machine Learning
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Building predictive models for financial markets.
+                  </p>
+                </CardContent>
+              </GridPanel>
+            </motion.div>
+
+            <motion.div
+              className="md:col-span-1 lg:col-span-2"
+              variants={gridItemVariants}
+              initial="initial"
+              whileHover="hover"
+            >
+              <GridPanel>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AnimatedIcon>
+                      <Calculator className="text-primary" />
+                    </AnimatedIcon>
+                    Algorithmic Trading
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    From strategy backtesting to live deployment.
+                  </p>
+                </CardContent>
+              </GridPanel>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
+        </div>
+        <CommandPalette />
+      </Dialog>
       <footer className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/80 p-2 text-center text-xs text-muted-foreground backdrop-blur-sm">
         SYSTEM.NORMAL | Connection secure | Latency: 12ms
       </footer>
