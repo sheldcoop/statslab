@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   BarChart,
   Bar,
@@ -92,19 +92,26 @@ export default function CltDiscoveryLab() {
   const [sampleMeans, setSampleMeans] = useState<number[]>([]);
   const [showTheoretical, setShowTheoretical] = useState(false);
 
+  const simulationRef = useRef<{ stop: boolean, intervalId?: NodeJS.Timeout }>({ stop: false });
+
   const runSimulation = useCallback(() => {
     if (isSimulating || populationData.length === 0) return;
     setIsSimulating(true);
     setSampleMeans([]);
-  
+    simulationRef.current.stop = false;
+
     let means: number[] = [];
-    const totalBatches = 100; // Run simulation in 100 batches for smooth animation
+    const totalBatches = 100;
     const batchSize = Math.ceil(numSamples / totalBatches);
     let currentBatch = 0;
   
     const simulationStep = () => {
-      if (currentBatch >= totalBatches) {
+      if (simulationRef.current.stop || currentBatch >= totalBatches) {
         setIsSimulating(false);
+        if(simulationRef.current.intervalId) {
+            cancelAnimationFrame(simulationRef.current.intervalId as unknown as number);
+            simulationRef.current.intervalId = undefined;
+        }
         return;
       }
   
@@ -117,13 +124,13 @@ export default function CltDiscoveryLab() {
       setSampleMeans(means);
   
       currentBatch++;
-      requestAnimationFrame(simulationStep);
+      simulationRef.current.intervalId = requestAnimationFrame(simulationStep) as unknown as NodeJS.Timeout;
     };
   
-    requestAnimationFrame(simulationStep);
+    simulationRef.current.intervalId = requestAnimationFrame(simulationStep) as unknown as NodeJS.Timeout;
   }, [sampleSize, numSamples, populationData, isSimulating]);
 
-  const fetchPopulationAndSimulate = useCallback(async () => {
+  const fetchPopulationData = useCallback(async () => {
     setIsPopulationLoading(true);
     setSampleMeans([]);
     const data = generatePopulationData(populationShape, 10000);
@@ -132,15 +139,8 @@ export default function CltDiscoveryLab() {
   }, [populationShape]);
 
   useEffect(() => {
-    fetchPopulationAndSimulate();
-  }, [fetchPopulationAndSimulate]);
-
-  useEffect(() => {
-    if (!isPopulationLoading && populationData.length > 0) {
-        runSimulation();
-    }
-    // This effect should re-run when the core parameters change
-  }, [isPopulationLoading, populationData, sampleSize, numSamples, runSimulation]);
+    fetchPopulationData();
+  }, [fetchPopulationData]);
 
   const populationBinned = useMemo(() => binData(populationData, 40), [populationData]);
   const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
@@ -170,8 +170,14 @@ export default function CltDiscoveryLab() {
   }, [sampleMeansBinned, theoreticalMean, theoreticalStdDev, sampleMeans.length]);
   
   const handleReset = useCallback(() => {
-    fetchPopulationAndSimulate();
-  }, [fetchPopulationAndSimulate]);
+    simulationRef.current.stop = true;
+    if (simulationRef.current.intervalId) {
+      cancelAnimationFrame(simulationRef.current.intervalId as unknown as number);
+      simulationRef.current.intervalId = undefined;
+    }
+    setIsSimulating(false);
+    fetchPopulationData();
+  }, [fetchPopulationData]);
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
