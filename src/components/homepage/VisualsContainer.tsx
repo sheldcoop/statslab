@@ -193,23 +193,28 @@ export default function VisualsContainer({
 }: {
   scrollYProgress: MotionValue<number>;
 }) {
+  const finalGridY = useTransform(scrollYProgress, [1.15, 1.25], [50, 0]);
+  const finalGridOpacity = useTransform(scrollYProgress, [1.15, 1.25], [0, 1]);
+
   return (
-    <div className="sticky top-0 h-screen w-full">
+    <div className="sticky top-0 h-screen w-full overflow-hidden">
       <FirstVisual scrollYProgress={scrollYProgress} />
-      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.35, 0.45]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.15, 0.25, 0.4, 0.5]}>
         <LinearAlgebraVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.5, 0.6, 0.7]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.4, 0.5, 0.65, 0.75]}>
         <StatisticsVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.65, 0.75, 0.85, 0.9]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.65, 0.75, 0.9, 1.0]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.87, 0.92, 0.95, 0.98]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.9, 1.0, 1.15, 1.25]}>
         <PythonVisual />
       </Visual>
        <ModuleGridVisual scrollYProgress={scrollYProgress}>
-        <ModuleGrid />
+        <motion.div style={{ y: finalGridY, opacity: finalGridOpacity }}>
+          <ModuleGrid />
+        </motion.div>
       </ModuleGridVisual>
     </div>
   );
@@ -222,7 +227,7 @@ const ModuleGridVisual = ({
   scrollYProgress: MotionValue<number>;
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
+  const opacity = useTransform(scrollYProgress, [1.15, 1.25], [0, 1]);
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
       <ChaosVisual />
@@ -237,7 +242,7 @@ const FirstVisual = ({
 }: {
   scrollYProgress: MotionValue<number>;
 }) => {
-  const opacity = useTransform(scrollYProgress, [0, 0.125, 0.25, 0.25], [1, 1, 0, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0]);
   return (
     <motion.div style={{ opacity }} className="absolute inset-0">
       <ChaosVisual />
