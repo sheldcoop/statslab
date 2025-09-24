@@ -27,13 +27,39 @@ import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { Loader2 } from 'lucide-react';
 
+const SIMULATION_SPEED_MS = 20; // How fast to run the simulation loop
+const BATCH_SIZE = 10; // How many samples to process per animation frame
+
+type Scene = 'intro' | 'single_sample' | 'simulation' | 'lab';
+
+// NOTE: This will be replaced by a real API call to a Python backend.
+// For now, we simulate the data generation on the client.
+const generatePopulationData = (distribution: string, count: number) => {
+    const { randomLogNormal, randomNormal } = require('d3-random');
+    switch (distribution) {
+      case 'positive-skew':
+        return Array.from({ length: count }, randomLogNormal(0, 1.5));
+      case 'negative-skew':
+        return Array.from({ length: count }, () => 10 - randomLogNormal(0, 1.5)());
+      case 'bimodal': {
+        const bimodal = () => (Math.random() < 0.5 ? randomNormal(2, 1)() : randomNormal(8, 1)());
+        return Array.from({ length: count }, bimodal);
+      }
+      case 'uniform':
+        return Array.from({ length: count }, () => Math.random() * 10);
+      case 'normal':
+      default:
+        return Array.from({ length: count }, randomNormal(5, 1.5));
+    }
+};
+
+
 const binData = (data: number[] | undefined, numBins: number) => {
     if (!data || data.length === 0) return [];
     
     let min = Math.min(...data);
     let max = Math.max(...data);
     
-    // Handle case where all data points are the same or only one point exists
     if (min === max) {
       min = min - 1;
       max = max + 1;
@@ -59,24 +85,9 @@ const binData = (data: number[] | undefined, numBins: number) => {
 };
 
 
-const SIMULATION_SPEED_MS = 20; // How fast to run the simulation loop
-const BATCH_SIZE = 10; // How many samples to process per animation frame
-
-type Scene = 'intro' | 'single_sample' | 'simulation' | 'lab';
-// A placeholder for the actual API call
-type DistributionInput = any;
-
 export default function CltDiscoveryLab() {
   const [scene, setScene] = useState<Scene>('intro');
-
-  const [populationParams, setPopulationParams] = useState<Omit<DistributionInput, 'count'>>({ 
-      distribution: 'positive-skew',
-      mean: 5,
-      stdDev: 2,
-      alpha: 2,
-      beta: 5
-  });
-
+  const [populationShape, setPopulationShape] = useState('positive-skew');
   const [populationData, setPopulationData] = useState<number[]>([]);
   const [isPopulationLoading, setIsPopulationLoading] = useState(true);
 
@@ -92,18 +103,11 @@ export default function CltDiscoveryLab() {
     setIsPopulationLoading(true);
     setSampleMeans([]);
     setCurrentSingleSample([]);
-    // This part is now broken and will be fixed next
-    // try {
-    //     const { data } = await generateDistributionFlow({ ...populationParams, count: 10000 });
-    //     setPopulationData(data);
-    // } catch (e) {
-    //     console.error("Failed to fetch population data", e);
-    // } finally {
-    //     setIsPopulationLoading(false);
-    // }
-    console.log('TODO: Wire up to the real backend API');
+    // This simulates fetching data from a backend.
+    const data = generatePopulationData(populationShape, 10000);
+    setPopulationData(data);
     setIsPopulationLoading(false);
-  }, [populationParams]);
+  }, [populationShape]);
 
   useEffect(() => {
     fetchPopulation();
@@ -149,6 +153,7 @@ export default function CltDiscoveryLab() {
   const runSimulation = useCallback(() => {
     setIsSimulating(true);
     if(scene === 'single_sample') {
+      // Don't clear the first sample mean
       setCurrentSingleSample([]);
     } else {
       setSampleMeans([]);
@@ -178,8 +183,14 @@ export default function CltDiscoveryLab() {
   const handleReset = useCallback(() => {
     setSampleMeans([]);
     setCurrentSingleSample([]);
+    fetchPopulation();
     setScene('intro');
-  }, []);
+  }, [fetchPopulation]);
+
+  const handlePopulationShapeChange = (v: string) => {
+    setPopulationShape(v);
+    handleReset();
+  }
 
   return (
     <div className="w-full space-y-8 p-4 md:p-8">
@@ -212,7 +223,7 @@ export default function CltDiscoveryLab() {
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* === CONTROLS === */}
-        <motion.div initial={false} animate={scene === 'lab' ? 'open' : 'closed'} className="lg:col-span-1">
+        <motion.div initial={false} className="lg:col-span-1">
              <Card>
               <CardHeader>
                 <CardTitle>The Laboratory</CardTitle>
@@ -220,14 +231,14 @@ export default function CltDiscoveryLab() {
               <CardContent className="space-y-6">
                 <AnimatePresence>
                   {scene === 'intro' && (
-                     <motion.div initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
+                     <motion.div key="intro-controls" initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}}>
                         <Button onClick={takeOneSample} className="w-full" disabled={isPopulationLoading || isSimulating}>
                           {isPopulationLoading ? 'Preparing Population...' : 'Take One Sample'}
                         </Button>
                      </motion.div>
                   )}
                   {scene === 'single_sample' && (
-                      <motion.div initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-4">
+                      <motion.div key="single-sample-controls" initial={{ opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-4">
                            <Button onClick={runSimulation} className="w-full" disabled={isSimulating}>
                               {isSimulating ? "Simulating..." : `Run Simulation (${numSamples.toLocaleString()} times)`}
                           </Button>
@@ -236,13 +247,14 @@ export default function CltDiscoveryLab() {
                   )}
                    {(scene === 'simulation' || scene === 'lab') && (
                     <motion.div
+                        key="lab-controls"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1, transition: { delay: 0.3 } }}
                         className="space-y-6"
                     >
                         <div>
                             <Label>Population Shape</Label>
-                            <Select value={populationParams.distribution} onValueChange={(v: DistributionInput['distribution']) => { setPopulationParams(p => ({...p, distribution: v})); setScene('intro'); }} disabled={isSimulating}>
+                            <Select value={populationShape} onValueChange={handlePopulationShapeChange} disabled={isSimulating}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="positive-skew">Skewed (Positive)</SelectItem>
@@ -292,9 +304,9 @@ export default function CltDiscoveryLab() {
                         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => v > 0 ? v : ''}/>
                         <Bar dataKey="value" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]}>
-                            {currentSampleBinned.length > 0 && populationBinned.map((entry, index) => {
-                                const isSampled = currentSampleBinned.some(sampleBin => entry.x0 < sampleBin.x1 && entry.x1 > sampleBin.x0 && sampleBin.value > 0);
-                                return <Cell key={`cell-${index}`} fill={isSampled ? 'hsl(var(--primary))' : 'hsl(var(--secondary))'} />;
+                            {populationBinned.map((entry, index) => {
+                                const isSampled = currentSingleSample.length > 0 && currentSampleBinned.some(sampleBin => entry.x0 < sampleBin.x1 && entry.x1 > sampleBin.x0 && sampleBin.value > 0);
+                                return <Cell key={`cell-${index}`} fill={isSampled ? 'hsl(var(--primary))' : 'hsl(var(--secondary))'} opacity={isSampled ? 1 : 0.6} />;
                             })}
                         </Bar>
                     </BarChart>
@@ -309,7 +321,7 @@ export default function CltDiscoveryLab() {
             <CardContent className="h-[300px]">
                <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={sampleMeansBinned} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                    <XAxis dataKey="name" domain={['dataMin', 'dataMax']} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
+                    <XAxis dataKey="name" domain={['dataMin', 'dataMax']} type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => Number(value).toFixed(1)} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={40} tickFormatter={(v) => v > 0 ? v : ''}/>
                     <Tooltip
                         cursor={{ fill: 'hsla(var(--muted) / 0.1)'}}
