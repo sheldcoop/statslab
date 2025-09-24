@@ -7,7 +7,7 @@ import {
   Code,
   Cpu,
   LineChart,
-  Pyramid,
+  Orbit,
   Sigma,
   TrendingUp,
 } from 'lucide-react';
@@ -129,7 +129,7 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AnimatedIcon isHovered={hoveredStates[0]}>
-                    <Pyramid className="text-primary" />
+                    <Orbit className="text-primary" />
                   </AnimatedIcon>
                   Linear Algebra
                 </CardTitle>
