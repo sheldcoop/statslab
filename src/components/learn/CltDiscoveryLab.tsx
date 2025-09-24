@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { randomLognormal, randomBates, randomExponential, randomNormal } from 'd3-random';
+import { randomLogNormal, randomBates, randomExponential, randomNormal } from 'd3-random';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 
@@ -32,7 +32,7 @@ import { Label } from '../ui/label';
 const generateData = (type: string, n: number) => {
   switch (type) {
     case 'skewed':
-      return Array.from({ length: n }, randomLognormal(0, 1.5));
+      return Array.from({ length: n }, randomLogNormal(0, 1.5));
     case 'bimodal': {
       const bimodal = () => {
         const r = Math.random();
@@ -307,5 +307,3 @@ export default function CltDiscoveryLab() {
     </div>
   );
 }
-
-    
