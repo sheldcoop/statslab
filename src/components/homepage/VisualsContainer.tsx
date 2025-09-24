@@ -184,10 +184,11 @@ const Visual = ({
   children,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: number[];
+  range: [number, number] | [number, number, number, number];
   children: React.ReactNode;
 }) => {
-  const opacity = useTransform(scrollYProgress, range, [0, 1, 1, 0]);
+  const opacityOutput = range.length === 4 ? [0, 1, 1, 0] : [0, 1];
+  const opacity = useTransform(scrollYProgress, range, opacityOutput);
   return <motion.div style={{ opacity }}>{children}</motion.div>;
 };
 
@@ -208,15 +209,28 @@ export default function VisualsContainer({
       <Visual scrollYProgress={scrollYProgress} range={[0.55, 0.6, 0.75, 0.8]}>
         <TimeSeriesVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.8, 0.95, 1]}>
+      <Visual scrollYProgress={scrollYProgress} range={[0.75, 0.8, 0.95, 1.0]}>
         <PythonVisual />
       </Visual>
-      <Visual scrollYProgress={scrollYProgress} range={[0.95, 1, 1, 1]}>
+       <ModuleGridVisual scrollYProgress={scrollYProgress} range={[0.95, 1.0]}>
         <ModuleGrid />
-      </Visual>
+      </ModuleGridVisual>
     </div>
   );
 }
+
+const ModuleGridVisual = ({
+  scrollYProgress,
+  range,
+  children,
+}: {
+  scrollYProgress: MotionValue<number>;
+  range: [number, number];
+  children: React.ReactNode;
+}) => {
+  const opacity = useTransform(scrollYProgress, range, [0, 1]);
+  return <motion.div style={{ opacity }}>{children}</motion.div>;
+};
 
 //Adjust the first Visual to be visible at the start
 const FirstVisual = ({

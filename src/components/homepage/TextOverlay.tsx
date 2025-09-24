@@ -10,7 +10,7 @@ const TextSection = ({
   subtitle,
 }: {
   scrollYProgress: MotionValue<number>;
-  range: number[];
+  range: [number, number, number, number];
   title: string;
   subtitle: string;
 }) => {
@@ -60,7 +60,7 @@ export default function TextOverlay({
       />
       <TextSection
         scrollYProgress={scrollYProgress}
-        range={[0.8, 0.85, 0.95, 1]}
+        range={[0.8, 0.85, 0.95, 1.0]}
         title="Python Brings It to Life"
         subtitle="With code, our ideas become engines. NumPy, Pandas, and Scikit-learn are the tools we use to build, test, and deploy our intuition."
       />
