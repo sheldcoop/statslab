@@ -3,8 +3,14 @@
 import { useRef } from 'react';
 import type { MotionValue } from 'framer-motion';
 import { useScroll } from 'framer-motion';
-import ScrollytellingCanvas from '@/components/homepage/ScrollytellingCanvas';
 import ScrollytellingOverlay from '@/components/homepage/ScrollytellingOverlay';
+import dynamic from 'next/dynamic';
+
+const ScrollytellingCanvas = dynamic(
+  () => import('@/components/homepage/ScrollytellingCanvas'),
+  { ssr: false }
+);
+
 
 export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
