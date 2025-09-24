@@ -49,18 +49,17 @@ const generatePopulationData = (distribution: string, count: number, mean: numbe
     }
 };
 
-const binData = (data: number[] | undefined, numBins: number, domain?: [number, number]) => {
+const binData = (data: number[] | undefined, numBins: number) => {
     if (!data || data.length === 0) return [];
     
-    let min = domain ? domain[0] : Math.min(...data);
-    let max = domain ? domain[1] : Math.max(...data);
+    let min = Math.min(...data);
+    let max = Math.max(...data);
     
-    if (!domain) {
-        const sortedData = [...data].sort((a, b) => a - b);
-        const p99 = sortedData[Math.floor(0.99 * sortedData.length)];
-        if (max > p99 * 1.5) { 
-            max = p99;
-        }
+    // For skewed data, we might want to cap the max to avoid extreme outliers distorting the view
+    const sortedData = [...data].sort((a, b) => a - b);
+    const p99 = sortedData[Math.floor(0.99 * sortedData.length)];
+    if (max > p99 * 1.5) { 
+        max = p99;
     }
     
     if (min === max) {
@@ -157,7 +156,40 @@ export default function CltDiscoveryLab() {
   }, [populationData]);
   
   const populationBinned = useMemo(() => binData(populationData, 50), [populationData]);
-  const sampleMeansBinned = useMemo(() => binData(sampleMeans, 40), [sampleMeans]);
+  
+  const sampleMeansBinned = useMemo(() => {
+    if (!sampleMeans || sampleMeans.length === 0) return [];
+    
+    let min = Math.min(...sampleMeans);
+    let max = Math.max(...sampleMeans);
+    
+    if (min === max) {
+      min = min - 1;
+      max = max + 1;
+    }
+
+    const numBins = 40;
+    const binSize = (max - min) / numBins;
+    if (binSize <= 0) return [];
+
+    const bins = Array.from({ length: numBins }, (_, i) => ({
+        name: (min + i * binSize).toFixed(2),
+        value: 0,
+        x0: min + i * binSize,
+        x1: min + (i + 1) * binSize,
+    }));
+
+    for (const d of sampleMeans) {
+        if (d >= min && d <= max) {
+            const binIndex = Math.min(Math.floor((d - min) / binSize), numBins - 1);
+            if (bins[binIndex]) {
+                bins[binIndex].value++;
+            }
+        }
+    }
+    return bins;
+  }, [sampleMeans]);
+
 
   const runFullSimulation = useCallback(() => {
     if (isSimulating) return;
@@ -262,11 +294,11 @@ export default function CltDiscoveryLab() {
                   </div>
                   <div>
                       <Label>Population Mean: {populationMeanParam}</Label>
-                      <Slider value={[populationMeanParam]} onValueChange={handleParamChange(setPopulationMeanParam)} min={0} max={12} step={0.5} disabled={isSimulating || populationShape !== 'normal'}/>
+                      <Slider value={[populationMeanParam]} onValueChange={handleParamChange(setPopulationMeanParam)} min={0} max={12} step={0.5} disabled={isSimulating}/>
                   </div>
                    <div>
                       <Label>Population Std. Dev: {populationStdDevParam.toFixed(1)}</Label>
-                      <Slider value={[populationStdDevParam]} onValueChange={handleParamChange(setPopulationStdDevParam)} min={0.5} max={5} step={0.1} disabled={isSimulating || populationShape !== 'normal'}/>
+                      <Slider value={[populationStdDevParam]} onValueChange={handleParamChange(setPopulationStdDevParam)} min={0.5} max={5} step={0.1} disabled={isSimulating}/>
                   </div>
                   <div>
                       <Label>Sample Size: {sampleSize}</Label>
