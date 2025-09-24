@@ -97,6 +97,11 @@ const pageData: { [key: string]: any } = {
           'Bridge the gap between academic concepts and practical application with hands-on examples.',
         items: [
           {
+            icon: BrainCircuit,
+            title: 'Central Limit Theorem',
+            description: 'Why the normal distribution is so important.',
+          },
+          {
             icon: TestTube2,
             title: 'Hypothesis Testing',
             description:
