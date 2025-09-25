@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 
 export default function TextOverlay() {
-  const headline = 'From Data to Decisions';
+  const staticHeadline = 'Data to ';
+  const typedHeadline = 'Quant';
   const subheadline =
     'An interactive, AI-powered toolkit for mastering quantitative concepts.';
 
@@ -12,7 +13,7 @@ export default function TextOverlay() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05,
+        staggerChildren: 0.1,
       },
     },
   };
@@ -21,14 +22,14 @@ export default function TextOverlay() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-  
+
   const subheadlineVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        delay: headline.length * 0.05 + 0.5, // Delay until after headline types
+        delay: typedHeadline.length * 0.1 + 0.5, // Delay until after headline types
         duration: 0.5,
       },
     },
@@ -36,19 +37,26 @@ export default function TextOverlay() {
 
   return (
     <div className="relative z-10 flex h-screen flex-col items-center justify-center text-center">
-      <motion.h1
-        variants={headlineVariants}
-        initial="hidden"
-        animate="visible"
-        className="font-headline text-5xl font-bold tracking-tighter text-foreground md:text-7xl"
-      >
-        {headline.split('').map((char, index) => (
-          <motion.span key={index} variants={charVariants}>
-            {char}
-          </motion.span>
-        ))}
-      </motion.h1>
-      <motion.p 
+      <h1 className="font-headline text-5xl font-bold tracking-tighter text-foreground md:text-7xl">
+        <span>{staticHeadline}</span>
+        <motion.span
+          variants={headlineVariants}
+          initial="hidden"
+          animate="visible"
+          aria-label={typedHeadline}
+        >
+          {typedHeadline.split('').map((char, index) => (
+            <motion.span
+              key={index}
+              variants={charVariants}
+              className="inline-block"
+            >
+              {char}
+            </motion.span>
+          ))}
+        </motion.span>
+      </h1>
+      <motion.p
         variants={subheadlineVariants}
         initial="hidden"
         animate="visible"
