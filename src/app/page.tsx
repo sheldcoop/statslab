@@ -2,10 +2,9 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import VisualsContainer from '@/components/homepage/VisualsContainer';
 import ModuleGrid from '@/components/homepage/ModuleGrid';
-import TextOverlay from '@/components/homepage/TextOverlay';
 import { Skeleton } from '@/components/ui/skeleton';
+import Hero from '@/components/homepage/Hero';
 
 const TestYourIntuition = dynamic(
   () => import('@/components/homepage/TestYourIntuition'),
@@ -41,25 +40,19 @@ export default function Home() {
   return (
     <>
       <main className="relative min-h-[300vh] bg-background text-foreground">
-        <div className="sticky top-0 h-screen w-full">
-          <VisualsContainer />
-        </div>
-        <div className="relative z-10">
-          <TextOverlay />
+        <Hero />
+        <div className="relative z-10 bg-background">
+          <section className="container mx-auto w-full max-w-6xl px-4 py-20 md:py-32">
+            <ModuleGrid />
+          </section>
 
-          <div className="bg-background">
-            <section className="container mx-auto w-full max-w-6xl px-4 py-20 md:py-32">
-              <ModuleGrid />
-            </section>
+          <section className="container mx-auto w-full max-w-4xl px-4 py-20 md:py-32">
+            <TestYourIntuition />
+          </section>
 
-            <section className="container mx-auto w-full max-w-4xl px-4 py-20 md:py-32">
-              <TestYourIntuition />
-            </section>
-
-            <section className="container mx-auto w-full max-w-6xl px-4 py-20 md:py-32">
-              <Testimonials />
-            </section>
-          </div>
+          <section className="container mx-auto w-full max-w-6xl px-4 py-20 md:py-32">
+            <Testimonials />
+          </section>
         </div>
       </main>
       <Footer />
