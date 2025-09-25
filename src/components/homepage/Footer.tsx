@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Dices, Twitter, Github, Linkedin } from 'lucide-react';
