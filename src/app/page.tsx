@@ -2,9 +2,22 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
-import ModuleGrid from '@/components/homepage/ModuleGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import Hero from '@/components/homepage/Hero';
+
+const ModuleGrid = dynamic(() => import('@/components/homepage/ModuleGrid'), {
+  loading: () => (
+    <div className="container mx-auto w-full max-w-6xl px-4 py-20 md:py-32 text-center">
+      <Skeleton className="mx-auto h-12 w-1/2" />
+      <Skeleton className="mx-auto mt-4 h-6 w-3/4" />
+      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-40 w-full" />
+        ))}
+      </div>
+    </div>
+  ),
+});
 
 const TestYourIntuition = dynamic(
   () => import('@/components/homepage/TestYourIntuition'),
@@ -39,7 +52,7 @@ const Footer = dynamic(() => import('@/components/homepage/Footer'), {
 export default function Home() {
   return (
     <>
-      <main className="relative min-h-[300vh] bg-background text-foreground">
+      <main className="relative bg-background text-foreground">
         <Hero />
         <div className="relative z-10 bg-background">
           <section className="container mx-auto w-full max-w-6xl px-4 py-20 md:py-32">
