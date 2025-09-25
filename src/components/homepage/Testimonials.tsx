@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -12,13 +13,14 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star } from 'lucide-react';
+import Image from 'next/image';
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const testimonials = [
   {
     name: 'Sarah L.',
     title: 'Quantitative Analyst, Hedge Fund',
     avatar: 'SL',
-    image: 'https://picsum.photos/seed/101/100/100',
     quote:
       "StatSpark's interactive modules on time series analysis were a game-changer for my model development. The visual approach solidified concepts I've only read about.",
   },
@@ -26,29 +28,28 @@ const testimonials = [
     name: 'David C.',
     title: 'Data Science Lead, FinTech Startup',
     avatar: 'DC',
-    image: 'https://picsum.photos/seed/102/100/100',
     quote:
-      'I recommend StatSpark to all my junior analysts. It bridges the gap between academic theory and real-world application faster than any other resource I\'ve seen.',
+      "I recommend StatSpark to all my junior analysts. It bridges the gap between academic theory and real-world application faster than any other resource I've seen.",
   },
   {
     name: 'Michael B.',
     title: 'Portfolio Manager, Asset Management',
     avatar: 'MB',
-    image: 'https://picsum.photos/seed/103/100/100',
     quote:
-      'The mental math trainers are surprisingly effective. My speed and accuracy in meetings have noticeably improved. It\'s an essential tool for any quant.',
+      "The mental math trainers are surprisingly effective. My speed and accuracy in meetings have noticeably improved. It's an essential tool for any quant.",
   },
   {
     name: 'Jennifer A.',
     title: 'PhD Student, Computational Finance',
     avatar: 'JA',
-    image: 'https://picsum.photos/seed/104/100/100',
     quote:
-      "Finally, a platform that respects the depth of the material while making it accessible. The linear algebra visualizations are second to none. A must-have for students.",
+      'Finally, a platform that respects the depth of the material while making it accessible. The linear algebra visualizations are second to none. A must-have for students.',
   },
 ];
 
 export default function Testimonials() {
+  const imagePlaceholders = placeholderImages.testimonials;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -73,41 +74,54 @@ export default function Testimonials() {
           className="w-full"
         >
           <CarouselContent>
-            {testimonials.map((testimonial, index) => (
-              <CarouselItem
-                key={index}
-                className="md:basis-1/2 lg:basis-1/3"
-              >
-                <div className="p-1">
-                  <Card className="h-full border-2 border-border bg-card/50">
-                    <CardContent className="flex h-full flex-col justify-between p-6 text-left">
-                      <div>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <p className="mt-4 text-base italic text-foreground/80">
-                          "{testimonial.quote}"
-                        </p>
-                      </div>
-                      <div className="mt-6 flex items-center gap-4">
-                        <Avatar>
-                          <AvatarImage src={testimonial.image} alt={testimonial.name} />
-                          <AvatarFallback>{testimonial.avatar}</AvatarFallback>
-                        </Avatar>
+            {testimonials.map((testimonial, index) => {
+              const placeholder = imagePlaceholders[index];
+              const imageUrl = `https://picsum.photos/seed/${placeholder.seed}/${placeholder.width}/${placeholder.height}`;
+
+              return (
+                <CarouselItem
+                  key={index}
+                  className="md:basis-1/2 lg:basis-1/3"
+                >
+                  <div className="p-1">
+                    <Card className="h-full border-2 border-border bg-card/50">
+                      <CardContent className="flex h-full flex-col justify-between p-6 text-left">
                         <div>
-                          <p className="font-bold">{testimonial.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {testimonial.title}
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                          <p className="mt-4 text-base italic text-foreground/80">
+                            "{testimonial.quote}"
                           </p>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
+                        <div className="mt-6 flex items-center gap-4">
+                          <Avatar>
+                            <AvatarImage asChild>
+                              <Image
+                                src={imageUrl}
+                                alt={testimonial.name}
+                                width={placeholder.width}
+                                height={placeholder.height}
+                                data-ai-hint={placeholder.hint}
+                              />
+                            </AvatarImage>
+                            <AvatarFallback>{testimonial.avatar}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-bold">{testimonial.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {testimonial.title}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              );
+            })}
           </CarouselContent>
           <CarouselPrevious className="absolute left-[-50px] top-1/2 -translate-y-1/2" />
           <CarouselNext className="absolute right-[-50px] top-1/2 -translate-y-1/2" />

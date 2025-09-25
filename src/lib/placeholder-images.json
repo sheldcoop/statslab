@@ -1,0 +1,32 @@
+{
+  "testimonials": [
+    {
+      "name": "Sarah L.",
+      "seed": "101",
+      "width": 100,
+      "height": 100,
+      "hint": "professional woman"
+    },
+    {
+      "name": "David C.",
+      "seed": "102",
+      "width": 100,
+      "height": 100,
+      "hint": "man tech"
+    },
+    {
+      "name": "Michael B.",
+      "seed": "103",
+      "width": 100,
+      "height": 100,
+      "hint": "male portfolio"
+    },
+    {
+      "name": "Jennifer A.",
+      "seed": "104",
+      "width": 100,
+      "height": 100,
+      "hint": "female student"
+    }
+  ]
+}
