@@ -7,6 +7,7 @@ import {
   Sigma,
   TrendingUp,
   BrainCircuit,
+  Container,
 } from 'lucide-react';
 import React, { useRef, useState, MouseEvent } from 'react';
 import { motion } from 'framer-motion';
@@ -49,6 +50,12 @@ const gridItems = [
     description: 'From strategy backtesting to live deployment.',
     href: '/modules/algorithmic-trading',
   },
+  {
+    icon: Container,
+    title: "Statistician's Toolkit",
+    description: 'Interactive tools for hands-on statistical analysis.',
+    href: '/modules/statisticians-toolkit',
+  },
 ];
 
 const GridItem = ({
@@ -87,9 +94,10 @@ const GridItem = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: 'easeOut' }}
+        viewport={{ once: true }}
         className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-300 ease-out hover:border-secondary"
       >
         <div
