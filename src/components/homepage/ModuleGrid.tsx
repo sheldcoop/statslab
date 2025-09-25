@@ -8,6 +8,7 @@ import {
   Orbit,
   Sigma,
   TrendingUp,
+  BrainCircuit,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -183,6 +184,28 @@ const BGMachineLearning = () => (
   </div>
 );
 
+const BGMentalMath = () => (
+  <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-10 flex items-center justify-center">
+    <div className="grid grid-cols-3 gap-2">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="w-8 h-8 bg-primary/50 rounded-sm"
+          initial={{ opacity: 0.2, scale: 0.8 }}
+          animate={{ opacity: [0.2, 0.6, 0.2], scale: [0.8, 1, 0.8] }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: i * 0.15,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+    </div>
+  </div>
+);
+
+
 const BGAlgorithmicTrading = () => (
   <div className="absolute inset-0 z-0 overflow-hidden rounded-lg opacity-20 flex items-center justify-center p-4">
     {Array.from({ length: 4 }).map((_, i) => (
@@ -217,12 +240,12 @@ const gridItems = [
     background: <BGStatistics />,
     href: '/modules/statistics',
   },
-  {
-    icon: Code,
-    title: 'Python for Quants',
-    description: 'NumPy, Pandas, SciPy. The tools of the trade.',
-    background: <BGPython />,
-    href: '/modules/python',
+    {
+    icon: BrainCircuit,
+    title: 'Mental Math',
+    description: 'Train your calculation speed and accuracy for interviews.',
+    background: <BGMentalMath />,
+    href: '/modules/mental-math',
   },
   {
     icon: TrendingUp,

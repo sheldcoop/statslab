@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import React from 'react';
+import MentalMathGrid from '@/components/learn/MentalMathGrid';
 
 // --- Animation Variants ---
 const sectionVariants = {
@@ -310,6 +311,8 @@ export default function ModulePage({ params }: { params: { slug: string } }) {
     switch (params.slug) {
       case 'statistics':
         return <StatisticsPage />;
+      case 'mental-math':
+        return <MentalMathGrid />;
       default:
         return <GenericPage title={title} />;
     }
