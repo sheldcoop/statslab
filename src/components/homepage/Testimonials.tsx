@@ -105,6 +105,7 @@ export default function Testimonials() {
                                 width={placeholder.width}
                                 height={placeholder.height}
                                 data-ai-hint={placeholder.hint}
+                                loading="lazy"
                               />
                             </AvatarImage>
                             <AvatarFallback>{testimonial.avatar}</AvatarFallback>
