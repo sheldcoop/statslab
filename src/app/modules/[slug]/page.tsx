@@ -106,12 +106,6 @@ const pageData: { [key: string]: any } = {
           'Bridge the gap between describing data and making predictions from it. This is the core of practical data science.',
         items: [
           {
-            icon: BrainCircuit,
-            title: 'Central Limit Theorem',
-            description: 'The magic bridge from samples to populations.',
-            href: '/learn/statistics/central-limit-theorem',
-          },
-          {
             icon: Scaling,
             title: 'Sampling and Estimation',
             description: 'Using samples to estimate population parameters and confidence intervals.',
