@@ -10,6 +10,7 @@ import {
   BrainCircuit,
 } from 'lucide-react';
 import React from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 const gridItems = [
@@ -53,22 +54,32 @@ const gridItems = [
 
 export default function ModuleGrid() {
   return (
-    <div className="w-full max-w-6xl text-center">
-      <header className="mb-12">
+    <div className="w-full max-w-6xl px-4 py-24 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.5 }}
+        className="mb-12"
+      >
         <h1 className="font-headline text-5xl font-bold md:text-7xl">
           Begin Your Journey
         </h1>
         <p className="mt-4 text-xl text-muted-foreground">
           Master the core pillars of quantitative finance and data science.
         </p>
-      </header>
+      </motion.div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {gridItems.map((item, index) => {
           const Icon = item.icon;
           return (
             <Link href={item.href} key={index} className="block h-full">
-              <div className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-200 ease-out hover:scale-105 hover:border-secondary hover:shadow-2xl hover:shadow-secondary/20">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.7 + index * 0.1 }}
+                className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-200 ease-out hover:scale-105 hover:border-secondary hover:shadow-2xl hover:shadow-secondary/20"
+              >
                 <div className="relative z-10">
                   <div className="mb-4">
                     <Icon className="h-8 w-8 text-secondary transition-transform duration-200 ease-out group-hover:scale-110" />
@@ -80,17 +91,22 @@ export default function ModuleGrid() {
                     {item.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </Link>
           );
         })}
       </div>
 
-      <footer className="mt-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 2.4 }}
+        className="mt-12"
+      >
         <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-headline text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/50 active:scale-95">
           Launch Terminal <ArrowRight />
         </button>
-      </footer>
+      </motion.div>
     </div>
   );
 }
