@@ -16,6 +16,12 @@ const Constellation = () => {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
+    // Get colors once
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+    const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+    const particleColor = `hsl(${primaryColor})`;
+    const lineColor = `hsla(${mutedColor}, 0.2)`;
+
     let particles: {
       x: number;
       y: number;
@@ -24,30 +30,27 @@ const Constellation = () => {
       radius: number;
     }[] = [];
 
-    const numParticles = Math.floor((width * height) / 15000);
-
-    for (let i = 0; i < numParticles; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: Math.random() * 0.5 - 0.25,
-        vy: Math.random() * 0.5 - 0.25,
-        radius: Math.random() * 1.5 + 0.5,
-      });
+    const createParticles = () => {
+        particles = [];
+        const numParticles = Math.floor((width * height) / 15000);
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: Math.random() * 0.5 - 0.25,
+            vy: Math.random() * 0.5 - 0.25,
+            radius: Math.random() * 1.5 + 0.5,
+            });
+        }
     }
+
+    createParticles();
 
     let animationFrameId: number;
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
-
-      // Use HSL colors from CSS variables
-      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-      const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
       
-      const particleColor = `hsl(${primaryColor})`;
-      const lineColor = `hsla(${mutedColor}, 0.2)`;
-
       ctx.fillStyle = particleColor;
       particles.forEach((p) => {
         p.x += p.vx;
@@ -83,18 +86,7 @@ const Constellation = () => {
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      // Re-initialize particles on resize
-      particles = [];
-      const newNumParticles = Math.floor((width * height) / 15000);
-      for (let i = 0; i < newNumParticles; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: Math.random() * 0.5 - 0.25,
-          vy: Math.random() * 0.5 - 0.25,
-          radius: Math.random() * 1.5 + 0.5,
-        });
-      }
+      createParticles();
     };
 
     window.addEventListener('resize', handleResize);
@@ -110,15 +102,11 @@ const Constellation = () => {
 
 
 export default function VisualsContainer() {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, -300]);
-
   return (
-    <motion.div
-      style={{ y }}
+    <div
       className="pointer-events-none absolute inset-0 h-screen w-full"
     >
       <Constellation />
-    </motion.div>
+    </div>
   );
 }
