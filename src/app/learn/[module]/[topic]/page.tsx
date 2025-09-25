@@ -22,6 +22,7 @@ export default function TopicPage({
   const topicTitle = formatSlug(params.topic);
 
   const renderContent = () => {
+    // Default placeholder content
     return (
       <div className="flex flex-1 flex-col items-center justify-center p-4 text-center md:p-6">
         <div className="space-y-4">
