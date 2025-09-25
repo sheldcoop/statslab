@@ -1,24 +1,12 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { useScroll } from 'framer-motion';
-import VisualsContainer from '@/components/homepage/VisualsContainer';
-import TextOverlay from '@/components/homepage/TextOverlay';
+import React from 'react';
+import ModuleGrid from '@/components/homepage/ModuleGrid';
 
 export default function Home() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: scrollRef,
-    offset: ['start start', 'end end'],
-  });
-
   return (
-    <main
-      ref={scrollRef}
-      className="relative min-h-[500vh] w-full bg-background text-foreground"
-    >
-      <VisualsContainer scrollYProgress={scrollYProgress} />
-      <TextOverlay scrollYProgress={scrollYProgress} />
+    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4">
+      <ModuleGrid />
     </main>
   );
 }

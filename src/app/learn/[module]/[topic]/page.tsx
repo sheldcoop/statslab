@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import CltDiscoveryLab from '@/components/learn/CltDiscoveryLab';
-import { Button } from '@/components/ui/button';
 
 function formatSlug(slug: string) {
   return slug
@@ -13,63 +11,13 @@ function formatSlug(slug: string) {
     .join(' ');
 }
 
-const PlaceholderContent = ({ topicTitle }: { topicTitle: string }) => (
-  <div className="flex flex-1 flex-col items-center justify-center p-4 text-center md:p-6">
-    <div className="space-y-4">
-      <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
-        {topicTitle}
-      </h1>
-      <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
-        This is a placeholder page for the {topicTitle} topic. Content will be
-        added here soon.
-      </p>
-    </div>
-  </div>
-);
-
-const HypothesisTestingContent = ({ onStartQuiz }: { onStartQuiz: () => void }) => (
-    <div className="flex flex-1 flex-col items-center justify-center p-4 text-center md:p-6">
-      <div className="space-y-4">
-        <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
-          Hypothesis Testing
-        </h1>
-        <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
-          Ready to test your knowledge? This quiz will challenge your understanding of null and alternative hypotheses, p-values, and statistical significance.
-        </p>
-        <Button onClick={onStartQuiz} size="lg">Start Quiz</Button>
-      </div>
-    </div>
-  );
-
-
 export default function TopicPage({
-  params: paramsProp,
+  params,
 }: {
   params: { module: string; topic: string };
 }) {
-  const params = React.use(paramsProp);
-  const [isQuizActive, setQuizActive] = useState(false);
-
-
   const moduleTitle = formatSlug(params.module);
   const topicTitle = formatSlug(params.topic);
-
-  const renderContent = () => {
-    if (isQuizActive) {
-        return (
-            <div>Quiz placeholder</div>
-        )
-    }
-
-    switch (params.topic) {
-      case 'central-limit-theorem':
-        return <CltDiscoveryLab />;
-      case 'hypothesis-testing':
-        return <HypothesisTestingContent onStartQuiz={() => setQuizActive(true)} />;
-      default:
-        return <PlaceholderContent topicTitle={topicTitle} />;
-    }
-  };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -82,8 +30,16 @@ export default function TopicPage({
           Back to {moduleTitle}
         </Link>
       </header>
-      <main className="flex flex-1 flex-col">
-        {renderContent()}
+      <main className="flex flex-1 flex-col items-center justify-center p-4 text-center md:p-6">
+        <div className="space-y-4">
+          <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
+            {topicTitle}
+          </h1>
+          <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
+            This is a placeholder page for the {topicTitle} topic. Content will
+            be added here soon.
+          </p>
+        </div>
       </main>
     </div>
   );
