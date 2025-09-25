@@ -1,16 +1,17 @@
 'use client';
 
-import { useScroll, useTransform } from 'framer-motion';
-import { motion } from 'framer-motion';
-import Constellation from './Constellation';
+import React, { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import Scene from './visuals/Scene';
 
 export default function VisualsContainer() {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
-
   return (
-    <motion.div style={{ y }} className="sticky top-0 h-screen w-full">
-      <Constellation />
-    </motion.div>
+    <div className="pointer-events-none absolute inset-0 h-screen w-full">
+      <Canvas>
+        <Suspense fallback={null}>
+          <Scene />
+        </Suspense>
+      </Canvas>
+    </div>
   );
 }

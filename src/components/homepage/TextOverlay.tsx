@@ -6,7 +6,6 @@ import {
   useScroll,
   useTransform,
   MotionValue,
-  useMotionTemplate,
 } from 'framer-motion';
 
 function useParallax(value: MotionValue<number>, distance: number) {
@@ -20,9 +19,19 @@ const content = [
       'An interactive, AI-powered toolkit for mastering quantitative concepts.',
   },
   {
-    title: 'Your Intuition Engine',
+    title: 'Linear Algebra',
     description:
-      'Explore concepts visually, build a deeper understanding, and accelerate your learning.',
+      'Visualize vectors, matrices, and transformations in 3D space. Build an intuition for the building blocks of data science.',
+  },
+  {
+    title: 'Statistics',
+    description:
+      'Explore probability distributions and statistical concepts in a dynamic, interactive way. See the data come to life.',
+  },
+  {
+    title: 'Time Series',
+    description:
+      'Uncover patterns and forecast trends by visualizing time-dependent data. From stock prices to climate data.',
   },
 ];
 
@@ -34,20 +43,22 @@ function Section({
   progress: MotionValue<number>;
 }) {
   const opacity = useTransform(progress, [i - 0.5, i, i + 0.5], [0, 1, 0]);
-  const y = useParallax(useTransform(progress, [i - 1, i], [0, 1]), -100);
+  const y = useParallax(useTransform(progress, [i - 0.5, i], [0.5, 0]), -100);
 
   return (
-    <motion.div
-      style={{ opacity, y }}
-      className="pointer-events-none fixed inset-0 z-10 flex flex-col items-center justify-center text-center"
-    >
-      <h1 className="font-headline text-6xl font-bold tracking-tighter text-foreground md:text-8xl lg:text-9xl">
-        {content[i].title}
-      </h1>
-      <p className="mt-4 max-w-2xl text-lg text-muted-foreground md:text-xl">
-        {content[i].description}
-      </p>
-    </motion.div>
+    <section className="flex h-screen flex-col items-center justify-center">
+      <motion.div
+        style={{ opacity, y }}
+        className="max-w-3xl text-center"
+      >
+        <h2 className="font-headline text-5xl font-bold tracking-tighter text-foreground md:text-7xl">
+          {content[i].title}
+        </h2>
+        <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+          {content[i].description}
+        </p>
+      </motion.div>
+    </section>
   );
 }
 
@@ -55,32 +66,20 @@ export default function TextOverlay() {
   const scrollRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: scrollRef,
-    offset: ['start start', 'end start'],
+    offset: ['start start', 'end end'],
   });
 
   const sectionProgress = useTransform(
     scrollYProgress,
     [0, 1],
-    [0, content.length]
+    [0, content.length -1]
   );
-  const gradientOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
-  const gradient = useMotionTemplate`radial-gradient(ellipse at 50% 50%, rgba(34, 34, 37, 0) 40%, rgba(34, 34, 37, 1) 70%), radial-gradient(ellipse at 50% 400px, var(--primary) 0%, #0000 40%)`;
-
+  
   return (
-    <>
-      <div ref={scrollRef} className="pointer-events-none h-[200vh]">
-        {content.map((_, i) => (
-          <Section key={i} i={i} progress={sectionProgress} />
-        ))}
-      </div>
-      <motion.div
-        style={{
-          opacity: gradientOpacity,
-          '--gradient': gradient,
-          background: 'var(--gradient)',
-        }}
-        className="pointer-events-none fixed inset-0 z-20"
-      />
-    </>
+    <div ref={scrollRef} className="relative z-10">
+      {content.map((_, i) => (
+        <Section key={i} i={i} progress={sectionProgress} />
+      ))}
+    </div>
   );
 }
