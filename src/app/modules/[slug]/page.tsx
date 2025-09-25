@@ -1,21 +1,6 @@
 'use client';
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Calculator,
-  Cpu,
-  Database,
-  FunctionSquare,
-  Sigma,
-  TrendingUp,
-  Variable,
-  Waypoints,
-  TestTube2,
-  BrainCircuit,
-  Scaling,
-  Timer,
-} from 'lucide-react';
+import * as icons from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -74,26 +59,26 @@ const pageData: { [key: string]: any } = {
           'Start with the absolute essentials. These concepts are the building blocks for everything that follows.',
         items: [
           {
-            icon: Calculator,
+            icon: icons.Calculator,
             title: 'Descriptive Statistics',
             description:
               'Summarizing data with mean, median, mode, and variance.',
             href: '/learn/statistics/descriptive-statistics',
           },
           {
-            icon: Database,
+            icon: icons.Database,
             title: 'Data Visualization',
             description: 'The power of histograms, box plots, and scatter plots.',
             href: '/learn/statistics/data-visualization',
           },
           {
-            icon: Sigma,
+            icon: icons.Sigma,
             title: 'Probability Theory',
             description: 'Understanding the laws of chance and likelihood.',
             href: '/learn/statistics/probability-theory',
           },
           {
-            icon: TrendingUp,
+            icon: icons.TrendingUp,
             title: 'Common Distributions',
             description:
               'Normal, Binomial, and Poisson distributions explained.',
@@ -107,26 +92,26 @@ const pageData: { [key: string]: any } = {
           'Bridge the gap between describing data and making predictions from it. This is the core of practical data science.',
         items: [
           {
-            icon: Scaling,
+            icon: icons.Scaling,
             title: 'Sampling and Estimation',
             description: 'Using samples to estimate population parameters and confidence intervals.',
             href: '/learn/statistics/sampling-and-estimation',
           },
           {
-            icon: TestTube2,
+            icon: icons.TestTube2,
             title: 'Hypothesis Testing',
             description:
               'Formulating and testing claims with data (p-values, A/B tests).',
             href: '/learn/statistics/hypothesis-testing',
           },
           {
-            icon: Waypoints,
+            icon: icons.Waypoints,
             title: 'Regression Analysis',
             description: 'Modeling the relationship between variables.',
             href: '/learn/statistics/regression-analysis',
           },
           {
-            icon: Cpu,
+            icon: icons.Cpu,
             title: 'Central Limit Theorem',
             description:
               'The cornerstone of statistical inference.',
@@ -140,25 +125,25 @@ const pageData: { [key: string]: any } = {
           'Explore specialized methods essential for modern quantitative finance.',
         items: [
           {
-            icon: Cpu,
+            icon: icons.Cpu,
             title: 'Monte Carlo Simulation',
             description: 'Modeling outcomes for complex, random systems.',
             href: '/learn/statistics/monte-carlo-simulation',
           },
           {
-            icon: Timer,
+            icon: icons.Timer,
             title: 'Time Series Analysis',
             description: 'Analyzing data points indexed in time (stationarity, ARIMA).',
             href: '/learn/statistics/time-series-analysis',
           },
           {
-            icon: BrainCircuit,
+            icon: icons.BrainCircuit,
             title: 'Bayesian Statistics',
             description: 'Updating beliefs in light of new evidence.',
             href: '/learn/statistics/bayesian-statistics',
           },
           {
-            icon: FunctionSquare,
+            icon: icons.FunctionSquare,
             title: 'Stochastic Processes',
             description: 'Understanding random walks and time-dependent systems.',
             href: '/learn/statistics/stochastic-processes',
@@ -288,7 +273,7 @@ const StatisticsPage = () => {
             className="mt-8 inline-block"
           >
             <Button size="lg" className="font-headline text-lg shadow-lg shadow-primary/20">
-              Launch Terminal <ArrowRight className="ml-2 h-5 w-5" />
+              Launch Terminal <icons.ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
         </div>
@@ -325,7 +310,7 @@ export default function ModulePage({ params }: { params: { slug: string } }) {
           href="/"
           className="flex items-center gap-2 text-lg font-semibold text-foreground transition-colors hover:text-primary"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <icons.ArrowLeft className="h-5 w-5" />
           Back to Home
         </Link>
       </header>
