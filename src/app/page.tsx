@@ -1,17 +1,16 @@
 'use client';
 
 import React from 'react';
-import ModuleGrid from '@/components/homepage/ModuleGrid';
-import VisualsContainer from '@/components/homepage/VisualsContainer';
 import TextOverlay from '@/components/homepage/TextOverlay';
+import VisualsContainer from '@/components/homepage/VisualsContainer';
 
 export default function Home() {
   return (
-    <main className="relative min-h-[300vh] bg-background">
-      <VisualsContainer>
-        <ModuleGrid />
-      </VisualsContainer>
+    <main className="relative min-h-[400vh] bg-background">
       <TextOverlay />
+      <VisualsContainer />
     </main>
   );
 }
+
+    
