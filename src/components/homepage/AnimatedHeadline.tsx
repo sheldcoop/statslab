@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const cursorVariants = {
   blinking: {
@@ -60,18 +60,7 @@ const AnimatedHeadline = ({
   return (
     <h1 className="font-headline text-5xl font-bold tracking-tighter text-foreground md:text-7xl">
       <span>{staticText}</span>
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={index}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-secondary"
-        >
-          {typedText}
-        </motion.span>
-      </AnimatePresence>
+      <span className="text-secondary">{typedText}</span>
       <motion.span
         variants={cursorVariants}
         animate="blinking"
