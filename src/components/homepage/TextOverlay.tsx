@@ -20,24 +20,9 @@ const content = [
       'An interactive, AI-powered toolkit for mastering quantitative concepts.',
   },
   {
-    title: 'Linear Algebra',
+    title: 'Your Intuition Engine',
     description:
-      'Explore vectors, matrices, and transformations in a 3D space. See the concepts behind the calculations.',
-  },
-  {
-    title: 'Statistics & Probability',
-    description:
-      'Visualize distributions, understand the Central Limit Theorem, and build an intuition for uncertainty.',
-  },
-  {
-    title: 'Time Series Analysis',
-    description:
-      'Deconstruct market data, identify trends, and understand the components of time-based data.',
-  },
-  {
-    title: 'Begin Your Journey',
-    description:
-      'Master the core pillars of quantitative finance and data science. Launch the interactive terminal to start.',
+      'Explore concepts visually, build a deeper understanding, and accelerate your learning.',
   },
 ];
 
@@ -70,20 +55,20 @@ export default function TextOverlay() {
   const scrollRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: scrollRef,
-    offset: ['start start', 'end end'],
+    offset: ['start start', 'end start'],
   });
 
   const sectionProgress = useTransform(
     scrollYProgress,
-    [0, 0.2, 0.4, 0.6, 0.8, 1],
-    [0, 1, 2, 3, 4, 4]
+    [0, 1],
+    [0, content.length]
   );
   const gradientOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
   const gradient = useMotionTemplate`radial-gradient(ellipse at 50% 50%, rgba(34, 34, 37, 0) 40%, rgba(34, 34, 37, 1) 70%), radial-gradient(ellipse at 50% 400px, var(--primary) 0%, #0000 40%)`;
 
   return (
     <>
-      <div ref={scrollRef} className="pointer-events-none">
+      <div ref={scrollRef} className="pointer-events-none h-[200vh]">
         {content.map((_, i) => (
           <Section key={i} i={i} progress={sectionProgress} />
         ))}
@@ -99,5 +84,3 @@ export default function TextOverlay() {
     </>
   );
 }
-
-    

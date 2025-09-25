@@ -2,8 +2,14 @@
 
 import { useScroll, useTransform } from 'framer-motion';
 import { motion } from 'framer-motion';
-import { ReactNode, Suspense } from 'react';
-import Scene from './visuals/Scene';
+import { ReactNode } from 'react';
+
+// A simple placeholder for visuals, can be expanded later
+const PlaceholderVisual = () => (
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+  </div>
+);
 
 export default function VisualsContainer({
   children,
@@ -21,12 +27,8 @@ export default function VisualsContainer({
       style={{ opacity }}
       className="sticky top-0 h-screen w-full"
     >
-      <Suspense fallback={null}>
-        <Scene scrollProgress={scrollYProgress} />
-      </Suspense>
+      <PlaceholderVisual />
       {children}
     </motion.div>
   );
 }
-
-    
