@@ -9,9 +9,10 @@ import {
   TrendingUp,
   BrainCircuit,
 } from 'lucide-react';
-import React from 'react';
+import React, { useRef, useState, MouseEvent } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const gridItems = [
   {
@@ -52,61 +53,109 @@ const gridItems = [
   },
 ];
 
+const GridItem = ({
+  item,
+  index,
+}: {
+  item: (typeof gridItems)[0];
+  index: number;
+}) => {
+  const divRef = useRef<HTMLDivElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [opacity, setOpacity] = useState(0);
+
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!divRef.current || isFocused) return;
+
+    const div = divRef.current;
+    const rect = div.getBoundingClientRect();
+
+    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    setOpacity(1);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    setOpacity(0);
+  };
+
+  const handleMouseEnter = () => {
+    setOpacity(1);
+  };
+
+  const handleMouseLeave = () => {
+    setOpacity(0);
+  };
+
+  return (
+    <Link href={item.href} className="block h-full">
+      <motion.div
+        ref={divRef}
+        onMouseMove={handleMouseMove}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+        className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-300 ease-out hover:scale-[1.02] hover:border-secondary"
+      >
+        <div
+          className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            opacity,
+            background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, hsla(var(--secondary), 0.15), transparent 80%)`,
+          }}
+        />
+        <div className="relative z-10">
+          <div className="mb-4">
+            <item.icon className="h-8 w-8 text-secondary transition-transform duration-300 ease-out group-hover:scale-110" />
+          </div>
+          <h3 className="font-headline text-2xl font-bold">{item.title}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {item.description}
+          </p>
+        </div>
+      </motion.div>
+    </Link>
+  );
+};
+
 export default function ModuleGrid() {
   return (
-    <div className="w-full max-w-6xl px-4 py-24 text-center">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.5 }}
-        className="mb-12"
-      >
-        <h1 className="font-headline text-5xl font-bold md:text-7xl">
+    <div className="w-full">
+      <div className="mb-8 text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          viewport={{ once: true }}
+          className="font-headline text-4xl font-bold md:text-5xl"
+        >
           Begin Your Journey
-        </h1>
-        <p className="mt-4 text-xl text-muted-foreground">
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="mt-3 text-lg text-muted-foreground"
+        >
           Master the core pillars of quantitative finance and data science.
-        </p>
-      </motion.div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {gridItems.map((item, index) => {
-          const Icon = item.icon;
-          return (
-            <Link href={item.href} key={index} className="block h-full">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.7 + index * 0.1 }}
-                className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-200 ease-out hover:scale-105 hover:border-secondary hover:shadow-2xl hover:shadow-secondary/20"
-              >
-                <div className="relative z-10">
-                  <div className="mb-4">
-                    <Icon className="h-8 w-8 text-secondary transition-transform duration-200 ease-out group-hover:scale-110" />
-                  </div>
-                  <h3 className="font-headline text-2xl font-bold">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
-              </motion.div>
-            </Link>
-          );
-        })}
+        </motion.p>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 2.4 }}
-        className="mt-12"
-      >
-        <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-headline text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/50 active:scale-95">
-          Launch Terminal <ArrowRight />
-        </button>
-      </motion.div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {gridItems.map((item, index) => (
+          <GridItem item={item} key={index} index={index} />
+        ))}
+      </div>
     </div>
   );
 }
