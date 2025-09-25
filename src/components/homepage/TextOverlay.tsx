@@ -12,28 +12,7 @@ function useParallax(value: MotionValue<number>, distance: number) {
   return useTransform(value, [0, 1], [-distance, distance]);
 }
 
-const content = [
-  {
-    title: 'StatSpark',
-    description:
-      'An interactive, AI-powered toolkit for mastering quantitative concepts.',
-  },
-  {
-    title: 'Linear Algebra',
-    description:
-      'Visualize vectors, matrices, and transformations in 3D space. Build an intuition for the building blocks of data science.',
-  },
-  {
-    title: 'Statistics',
-    description:
-      'Explore probability distributions and statistical concepts in a dynamic, interactive way. See the data come to life.',
-  },
-  {
-    title: 'Time Series',
-    description:
-      'Uncover patterns and forecast trends by visualizing time-dependent data. From stock prices to climate data.',
-  },
-];
+const content: { title: string; description: string }[] = [];
 
 function Section({
   i,
