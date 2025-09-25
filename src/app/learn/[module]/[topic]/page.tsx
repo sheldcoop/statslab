@@ -16,6 +16,10 @@ export default function TopicPage({
 }: {
   params: { module: string; topic: string };
 }) {
+  if (!params || !params.module || !params.topic) {
+    return null;
+  }
+
   const moduleTitle = formatSlug(params.module);
   const topicTitle = formatSlug(params.topic);
 

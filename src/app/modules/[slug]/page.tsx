@@ -12,10 +12,9 @@ function formatSlug(slug: string) {
 }
 
 export default function ModulePage({ params }: { params: { slug: string } }) {
-   if (!params || !params.slug) {
-    return null; 
+  if (!params || !params.slug) {
+    return null;
   }
-  
   const title = formatSlug(params.slug);
 
   return (
