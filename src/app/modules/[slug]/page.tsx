@@ -125,10 +125,11 @@ const pageData: { [key: string]: any } = {
             href: '/learn/statistics/regression-analysis',
           },
           {
-            icon: Variable,
-            title: 'Correlation vs. Causation',
-            description: 'A critical distinction for any data scientist.',
-            href: '/learn/statistics/correlation-vs-causation',
+            icon: Cpu,
+            title: 'Central Limit Theorem',
+            description:
+              'The cornerstone of statistical inference.',
+            href: '/learn/statistics/central-limit-theorem',
           },
         ],
       },

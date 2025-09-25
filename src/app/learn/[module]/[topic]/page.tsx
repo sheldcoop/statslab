@@ -3,6 +3,7 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import CltDiscoveryLab from '@/components/learn/CltDiscoveryLab';
 
 function formatSlug(slug: string) {
   return slug
@@ -22,20 +23,24 @@ export default function TopicPage({
   const topicTitle = formatSlug(params.topic);
 
   const renderContent = () => {
-    // Default placeholder content
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center p-4 text-center md:p-6">
-        <div className="space-y-4">
-          <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
-            {topicTitle}
-          </h1>
-          <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
-            This is a placeholder page for the {topicTitle} topic. Content
-            will be added here soon.
-          </p>
-        </div>
-      </div>
-    );
+    switch (params.topic) {
+      case 'central-limit-theorem':
+        return <CltDiscoveryLab />;
+      default:
+        return (
+          <div className="flex flex-1 flex-col items-center justify-center p-4 text-center md:p-6">
+            <div className="space-y-4">
+              <h1 className="font-headline text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
+                {topicTitle}
+              </h1>
+              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
+                This is a placeholder page for the {topicTitle} topic. Content
+                will be added here soon.
+              </p>
+            </div>
+          </div>
+        );
+    }
   };
 
   return (
