@@ -5,11 +5,13 @@ import VisualsContainer from '@/components/homepage/VisualsContainer';
 import AnimatedHeadline from './AnimatedHeadline';
 
 const taglines = [
-  ['Data to ', 'Quant'],
-  ['Theory to ', 'Trade'],
-  ['Insight to ', 'Impact'],
-  ['Numbers to ', 'Narrative'],
-];
+    ["From Data to ", "Insight"],
+    ["From Insight to ", "Model"],
+    ["From Model to ", "Signal"],
+    ["From Signal to ", "Trade"],
+    ["From Trade to ", "Alpha"],
+    ["From Alpha to ", "Mastery"]
+  ];
 
 export default function Hero() {
   return (
