@@ -124,27 +124,25 @@ const GridItem = ({
 export default function ModuleGrid() {
   return (
     <div className="w-full">
-      <div className="mb-12 text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          viewport={{ once: true }}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        viewport={{ once: true }}
+        className="mb-12 text-center"
+      >
+        <h2
           className="font-headline text-4xl font-bold md:text-5xl"
         >
           Begin Your Journey
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          viewport={{ once: true }}
+        </h2>
+        <p
           className="mx-auto mt-3 max-w-2xl text-lg text-muted-foreground"
         >
           Master the core pillars of quantitative finance and data science, from
           foundational theory to practical application.
-        </motion.p>
-      </div>
+        </p>
+      </motion.div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {gridItems.map((item, index) => (
