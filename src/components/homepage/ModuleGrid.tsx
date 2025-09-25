@@ -95,8 +95,8 @@ const GridItem = ({
         onMouseLeave={handleMouseLeave}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: 'easeOut' }}
+        whileHover={{ scale: 1.03 }}
+        transition={{ duration: 0.3, delay: 0.3 + index * 0.05, ease: 'easeOut' }}
         viewport={{ once: true }}
         className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-300 ease-out hover:border-secondary"
       >
@@ -124,11 +124,11 @@ const GridItem = ({
 export default function ModuleGrid() {
   return (
     <div className="w-full">
-      <div className="mb-8 text-center">
+      <div className="mb-12 text-center">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
           viewport={{ once: true }}
           className="font-headline text-4xl font-bold md:text-5xl"
         >
@@ -137,11 +137,12 @@ export default function ModuleGrid() {
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mt-3 text-lg text-muted-foreground"
+          className="mx-auto mt-3 max-w-2xl text-lg text-muted-foreground"
         >
-          Master the core pillars of quantitative finance and data science.
+          Master the core pillars of quantitative finance and data science, from
+          foundational theory to practical application.
         </motion.p>
       </div>
 
