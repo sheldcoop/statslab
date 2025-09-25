@@ -88,8 +88,9 @@ const GridItem = ({
         onMouseLeave={handleMouseLeave}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-        className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-300 ease-out hover:scale-[1.02] hover:border-secondary"
+        whileHover={{ scale: 1.02 }}
+        transition={{ duration: 0.5, delay: 0.5 + index * 0.1, ease: 'easeOut' }}
+        className="group relative h-full overflow-hidden rounded-lg border-2 border-border bg-card p-6 text-left transition-all duration-300 ease-out hover:border-secondary"
       >
         <div
           className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"

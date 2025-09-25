@@ -10,8 +10,12 @@ export default function VisualsContainer({
 }: {
   children?: ReactNode;
 }) {
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
+
   return (
     <motion.div
+      style={{ y }}
       className="sticky top-0 h-screen w-full"
     >
       <Constellation />
