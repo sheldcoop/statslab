@@ -1,12 +1,33 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 
 const Constellation = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (canvasRef.current) {
+      observer.observe(canvasRef.current);
+    }
+
+    return () => {
+      if (canvasRef.current) {
+        observer.unobserve(canvasRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -15,10 +36,10 @@ const Constellation = () => {
 
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    let animationFrameId: number;
 
-    // Get colors once
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-    const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim();
+    const primaryColor = '221 63% 45%';
+    const mutedColor = '220 14% 50%';
     const particleColor = `hsl(${primaryColor})`;
     const lineColor = `hsla(${mutedColor}, 0.2)`;
 
@@ -32,21 +53,20 @@ const Constellation = () => {
 
     const createParticles = () => {
         particles = [];
-        const numParticles = Math.floor((width * height) / 15000);
+        // Drastically reduce particle count for performance
+        const numParticles = 80;
         for (let i = 0; i < numParticles; i++) {
             particles.push({
             x: Math.random() * width,
             y: Math.random() * height,
-            vx: Math.random() * 0.5 - 0.25,
-            vy: Math.random() * 0.5 - 0.25,
-            radius: Math.random() * 1.5 + 0.5,
+            vx: Math.random() * 0.3 - 0.15,
+            vy: Math.random() * 0.3 - 0.15,
+            radius: Math.random() * 1.2 + 0.5,
             });
         }
     }
 
     createParticles();
-
-    let animationFrameId: number;
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
@@ -65,11 +85,11 @@ const Constellation = () => {
       });
 
       ctx.strokeStyle = lineColor;
-      ctx.lineWidth = 0.5;
+      ctx.lineWidth = 0.4;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
-          if (dist < 100) {
+          if (dist < 120) { // Slightly increased distance for visual effect with fewer particles
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -95,7 +115,7 @@ const Constellation = () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [isVisible]);
 
   return <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" />;
 };
