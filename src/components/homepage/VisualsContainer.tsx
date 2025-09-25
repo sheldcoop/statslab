@@ -20,6 +20,7 @@ const Constellation = () => {
 
     return () => {
       if (canvasRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(canvasRef.current);
       }
     };
